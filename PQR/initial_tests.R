@@ -1,5 +1,7 @@
 library(parallel)
-
+library(ggplot2)
+library(ggpubr)
+library(Brq)
 
 DXX <- data.frame(mod = c("D31","D32","D33","D34",
                           "D41","D42","D43","D44",
@@ -38,7 +40,8 @@ GG_model <- function(mod, n = 200){
   k = exp(params[[5]] + params[[6]]*x)
   theta = exp(mu)/(k^(sigma*sqrt(k)))
   beta = 1/(sigma*sqrt(k))
-  y = (rgamma(n = n, shape = k, scale = theta^beta))^(1/beta)
+  scale = theta^beta
+  y = (rgamma(n = n, shape = k, scale = scale))^(1/beta)
   return(list(
     data = data.frame(x = x, y = y),
     params = params,
@@ -47,40 +50,98 @@ GG_model <- function(mod, n = 200){
   ))
 }
 
-qGG <- function(params,quant,x){
-  if (length(params)==3){
-    params = c(params[1],0,params[2],0,params[3],0)
-  }else if (length(params==4)){
-    params = c(params[1:3],0,params[4],0)
-  }else if (length(params)==5){
-    params = c(params,0)
+fix_params <- function(x){
+  if (length(x)==3){
+    x = c(x[[1]],0,x[[2]],0,x[[3]],0)
+  }else if (length(x)==4){
+    x = c(x[[1]],x[[2]],x[[3]],0,x[[4]],0)
+  }else if (length(x)==5){
+    x = c(x,0)
   }
-  exp(params[[1]] + params[[2]]*x)*
-    (qgamma(quant,scale = 1, shape = exp(params[[5]]+params[[6]]*x))/
-       exp(params[[5]]+params[[6]]*x))^(exp(params[[3]] + params[[4]]*x)/
-                                          sqrt(exp(params[[5]] + params[[6]]*x)))
+  return(x)
 }
 
-optim_quant <- function(quant,data,init){
-  res = rep(NA,nrow(data))
-  for (i in seq(length(res))){
-    fr = function(x){
-      qGG(params = x,quant=quant, x = data$x[i])
-    }
-    res[i] = optim(init,fr)
-  }
-  return(res)
+
+
+ml_gg <- function(x,covar,res){
+  x = fix_params(x)
+  mu = x[[1]] + x[[2]]*covar
+  sigma = exp(x[[3]] + x[[4]]*covar)
+  k = exp(x[[5]] + x[[6]]*covar)
+  w = (res-mu)/sigma
+  return(sum(-log(sigma) + (k-1/2)*log(k) - lgamma(k) + w*sqrt(k) - k*exp(w/sqrt(k))))
 }
 
-PQR <- function(mod,n = 200){
-  res = GG_model(mod,n)
+ml_optim <- function(covar,response,init){
+  fr = function(x){
+    ml_gg(x=x, covar=covar,res = log(response))
+  }
+  tmpres = optim(init,fr,control=list(fnscale=-1))
+  return(tmpres$par)
+}
+
+q_reg_GG <- function(params,covar,quants){
+  params = fix_params(params)
+  mu = params[[1]] + params[[2]]*covar
+  sigma = exp(params[[3]] + params[[4]]*covar)
+  k = exp(params[[5]] + params[[6]]*covar)
+  res = data.frame(x = NA, y = NA, quant = NA)
+  for (quant in quants){
+    tmpr = qgamma(quant,shape = k,scale = 1)
+    tmpquant = exp(mu)*(tmpr/k)^(sigma*sqrt(k)) 
+    res = rbind(res,data.frame(x = covar, y = tmpquant, quant = rep(toString(quant),length(covar))))
+  }
+  return(res[-1,])
+}
+
+
+PQR <- function(x,y,init,dom){
   quants = c(0.1,0.25,0.5,0.75,0.9)
-  init = rep(0,sum(res$params!=0))
-  for (quant in quants[1]){
-    res2 = optim_quant(quant,res$data,init = init)
-  }
-  # quant_optim = mclapply(quant,function(x){
-  #   optim_quant(quant,data,init)
-  # }, mc.set.seed = TRUE, mc.cores = ncores)
-  return(res2)
+  ml_params = ml_optim(x,y,init)
+  quantiles = q_reg_GG(ml_params,seq(dom[1],dom[2],length.out = 200),quants)
+  return(list(ml = ml_params,
+              quantiles = quantiles))
 }
+mod = GG_model("D32",n=500)
+res = PQR(mod$data$x,mod$data$y,init = rep(0,sum(mod$params!=0)),dom = c(0,1))
+fig1 <- ggplot(res$quantiles, aes(x=x,y=y,color = quant))+
+  geom_line() + 
+  labs(title="D32",x="x",y="",color = "quantiles") + 
+  theme_bw()
+mod = GG_model("D42",n=500)
+res = PQR(mod$data$x,mod$data$y,init = rep(0,sum(mod$params!=0)),dom = c(0,1))
+fig2 <- ggplot(res$quantiles, aes(x=x,y=y,color = quant))+
+  geom_line() + 
+  labs(title="D42",x="x",y="",color = "quantiles") + 
+  theme_bw()
+mod = GG_model("D54",n=500)
+res = PQR(mod$data$x,mod$data$y,init = rep(0,sum(mod$params!=0)),dom = c(0,1))
+fig3 <- ggplot(res$quantiles, aes(x=x,y=y,color = quant))+
+  geom_line() + 
+  labs(title="D54",x="x",y="",color = "quantiles") + 
+  theme_bw()
+mod = GG_model("D62",n=500)
+res = PQR(mod$data$x,mod$data$y,init = rep(0,sum(mod$params!=0)),dom = c(0,1))
+fig4 <- ggplot(res$quantiles, aes(x=x,y=y,color = quant))+
+  geom_line() + 
+  labs(title="D62",x="x",y="",color = "quantiles") + 
+  theme_bw()
+
+fig_tot <- ggarrange(fig1, fig2, fig3, fig4, ncol=2, nrow=2, common.legend = TRUE, legend="bottom")
+fig_tot
+ggsave(filename = "sim_pqr_gg.pdf", plot = fig_tot, device = NULL, path = "./figures/",
+       scale = 1, width = 5, height = 5, units = "in", dpi=5000)
+
+data("ImmunogG")
+res_igg <- PQR(ImmunogG$Age,ImmunogG$IgG, init =c(1, 0.05, -1,0, -3, 5),dom=c(0,7))
+
+fig_igg <- ggplot() + 
+  geom_line(data = res_igg$quantiles, aes(x=x,y=y,color = quant))+ 
+  geom_point(data = ImmunogG, aes(x=Age,y=IgG)) + 
+  labs(x="Age(years)",y="IgG(g/l)",color = "quantiles") + 
+  theme_bw()
+fig_igg
+ggsave(filename = "igg_gg.pdf", plot = fig_igg, device = NULL, path = "./figures/",
+       scale = 1, width = 5, height = 5, units = "in", dpi=5000)
+
+  
