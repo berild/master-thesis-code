@@ -8,31 +8,46 @@ library(mvtnorm)
 library(MASS)
 library(coda)
 
-df = read.csv(file="./data/italyturnout.csv")
-italy_map <- map_data("italy")
 
-lw <- nb2listw(col.gal.nb, style="W")
-colsemml <- errorsarlm(CRIME ~ INC + HOVAL, data=columbus, lw, method="eigen", 
-                       quiet=TRUE)
-W <- as(as_dgRMatrix_listw(nb2listw(col.gal.nb)), "CsparseMatrix")
-columbus$idx<-1:nrow(columbus)
-form<- CRIME ~ INC + HOVAL
-zero.variance = list(prec=list(initial = 25, fixed=TRUE))
-df = columbus
-init = list(mu = 0, cov = 2)
+library(rgdal)
+library(sp)
+library(RColorBrewer)
+library(spdep)
 
-source("./sem/sem_general_functions.R")
+# LOad data
+load("./data/load_data.RData")
 
-#source("./sem/sem_amis_w_inla.R")
-#amis_w_inla_mod <- amis.w.inla(data = df, init = init, prior.rho, 
-#                               dq.rho, rq.rho, fit.inla, 
-#                               N_t = seq(25,50,1)*10, N_0 = 250)
-#save(amis_w_inla_mod, file = "./sem/sims/sem-amis-w-inla.Rdata")
+# Models with INLABMA
+library(INLA)
+library(INLABMA)
 
-#source("./sem/sem_is_w_inla.R")
-#is_w_inla_mod <- is.w.inla(data = df, init = init, prior.rho, 
-#                           dq.rho, rq.rho,fit.inla, N_0 = 800, N = 10000)
-#save(is_w_inla_mod, file = "./sem/sims/sem-is-w-inla.Rdata")
+# Fit models
+library(parallel)
+options(mc.cores = 4)
+
+# Set hthis for parallel computing
+inla.setOption(num.threads = 2)
+
+# Number of grid points in each dimension
+n.xy <-  c(40, 20) #rho, lambda)
+
+
+form <- TURNOUT01 ~ 1 + log(GDPCAP)
+
+init = list()
+
+source("./sem/general_functions.R")
+
+source("./sem/amis_w_inla.R")
+amis_w_inla_mod <- amis.w.inla(data = turnout, init = init, prior.rho, 
+                               dq.rho, rq.rho, fit.inla, 
+                               N_t = seq(25,50,1)*10, N_0 = 250)
+save(amis_w_inla_mod, file = "./sem/sims/sem-amis-w-inla.Rdata")
+
+source("./sem/sem_is_w_inla.R")
+is_w_inla_mod <- is.w.inla(data = df, init = init, prior.rho, 
+                           dq.rho, rq.rho,fit.inla, N_0 = 800, N = 10000)
+save(is_w_inla_mod, file = "./sem/sims/sem-is-w-inla.Rdata")
 
 source("./sem/sem_mcmc_w_inla.R")
 mcmc_w_inla_mod <- mcmc.w.inla(data = df, init = init$mu,

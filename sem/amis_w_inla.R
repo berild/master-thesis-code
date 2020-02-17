@@ -6,13 +6,13 @@ require(parallel)
 require(mvtnorm)
 
 dq.rho <- function(y, x, sigma = init$cov, log =TRUE) {
-  #dmvt(y,sigma = matrix(sigma), df=3, delta = x, type = "shifted")
-  dnorm(y, mean = x, sd = sqrt(sigma), log = log)
+  dmvt(y,sigma = matrix(sigma), df=3, delta = x, type = "shifted")
+  #dnorm(y, mean = x, sd = sqrt(sigma), log = log)
 }
 
 rq.rho <- function(x, sigma = init$cov) {
-  #as.vector(rmvt(1,sigma = matrix(sigma), df=3, delta = x, type = "shifted"))
-  rnorm(1, mean = x, sd = sqrt(sigma))
+  as.vector(rmvt(1,sigma = matrix(sigma), df=3, delta = x, type = "shifted"))
+  #rnorm(1, mean = x, sd = sqrt(sigma))
 }
 
 calc.delta <- function(N_t,eta,theta,t,d.prop){

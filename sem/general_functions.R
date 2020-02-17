@@ -6,22 +6,40 @@ require(spatialreg)
 require(mvtnorm)
 require(MASS)
 
-prior.rho <- function(x, log = TRUE) {
-  dunif(x, -1.5, 1, log = log)
+prior.rho.lambda <- function(x, log = TRUE) {
+  dunif(x, -1, 1, log = log)
 }
 
-fit.inla <- function(data, eta) {
-  res <- sem.inla(form, d = data, W = W, rho = eta,
-                  family = "gaussian", impacts = FALSE,
-                  control.family = list(hyper = zero.variance),
-                  verbose = FALSE)
+
+fit.inla <- function(data,eta){
+  res <- try(sac.inla(form, d = as.data.frame(data), W.rho = W, W.lambda = W,
+                      fhyper = list(prec = list(param = c(0.01, 0.01))),
+                      rho = eta$rho,
+                      lambda = eta$lambda,
+                      family = "gaussian", impacts = FALSE,
+                      control.fixed = list(prec.intercept = 0.001),
+                      control.family = list(hyper = zero.variance),
+                      control.predictor = list(compute = TRUE),
+                      control.compute = list(dic = TRUE, cpo = TRUE),
+                      control.inla = list(print.joint.hyper = TRUE, #), 
+                                          strategy = "laplace", tolerance = 1e-10, h = 0.001),
+                      # Start close to ML estimate
+                      control.mode = list(theta = log(0.2), restart = TRUE),
+                      improve = FALSE,
+                      verbose = FALSE
+  ))
+  logdet <- res$logdet
+  res <- try(inla.rerun(res))
   
+  res$logdet <- logdet
+  res$mlik <- res$mlik + 0.5 * logdet
   return(list(mlik = res$mlik[[1]],
               dists = list(intercept = res$marginals.fixed[[1]],
-                           INC = res$marginals.fixed[[2]],
-                           HOVAL = res$marginals.fixed[[3]],
-                           tau = res$marginals.hyperpar[[1]])))
+                           GDPCAP = res$marginals.fixed[[2]],
+                           tau = res$marginals.hyperpar[[1]]),
+              logdet = res$logdet))
 }
+
 
 calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   theta$a.mu[i_cur] = sum(eta[1:i_tot]*weight[1:i_tot])/sum(weight[1:i_tot])
