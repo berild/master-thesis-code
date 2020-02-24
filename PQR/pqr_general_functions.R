@@ -6,18 +6,23 @@ require(mvtnorm)
 require(MASS)
 
 prior.param <- function(x, log = TRUE) {
-  sum(dunif(x, -10, 10, log = log))
+  sum(dunif(x, -100, 100, log = log))
 }
 
 
 fit.inla <- function(data,eta){
-  res = inla(y~1 + x, data = data, 
-             scale = prec.scale, family = "gamma")
+  res = inla(y ~ 1 + x, 
+             data = mod$data,
+             scale = exp(eta[1] + eta[2]*data$x), 
+             family = "gamma",
+             control.family=list(hyper=list(theta=list(initial=log(1),fixed=FALSE))),
+             verbose = FALSE,
+             quantiles=c(0.1, 0.25, 0.5, 0.75, 0.9))
   return(list(mlik = res$mlik[[1]],
               dists = list(intercept = res$marginals.fixed[[1]],
-                           GDPCAP = res$marginals.fixed[[2]],
-                           tau = res$marginals.hyperpar[[1]]),
-              logdet = logdet))
+                           beta = res$marginals.fixed[[2]],
+                           sigma = res$marginals.hyperpar[[1]]),
+              stats = res$summary.fixed))
 }
 
 

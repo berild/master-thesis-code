@@ -3,7 +3,8 @@ library(ggplot2)
 library(ggpubr)
 library(Brq)
 library(INLA)
-
+source("./PQR/pqr_general_functions.R")
+source("./PQR/pqr_amis_w_inla.R")
 DXX <- data.frame(mod = c("D31","D32","D33","D34",
                           "D41","D42","D43","D44",
                           "D51","D52","D53","D54",
@@ -24,10 +25,10 @@ DXX <- data.frame(mod = c("D31","D32","D33","D34",
                         0,0,0,0,
                         0.8,-0.5,-2.0,1.5,
                         -0.85,-4.00,0.10,1.50),
-                  f = c(1,1,1,1,
-                        1,1,1,1,
-                        1,1,1,1,
-                        1,1,1,1),
+                  f = c(0,0,0,0,
+                        0,0,0,0,
+                        0,0,0,0,
+                        0,0,0,0),
                   g = c(0,0,0,0,
                         0,0,0,0,
                         0,0,0,0,
@@ -51,27 +52,77 @@ GG_model <- function(mod, n = 200){
   ))
 }
 
-
-
-eta = mod$params$a + mod$params$b*mod$data$x
-mu = exp(eta)
-  prec.scale = mod$params$c + mod$params$d*mod$data$x
-  prec.par = 1
-  a = prec.par * prec.scale
-b = mu / (prec.par * prec.scale)
-y = rgamma(n, shape = a, scale = b)
-r = inla(y ~ 1 + x, data = mod$data,
-         scale = prec.scale, family = "gamma")
-
-
 mod = GG_model("D51",n=500)
+init = list(mu = c(0,0),cov = 5*diag(2))
+amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param, 
+                              dq.param, rq.param, fit.inla, 
+                              N_t = seq(25,50,1), N_0 = 25)
+save(amis_w_inla_mod, file = "./sims/d51-pqr-amis-w-inla.Rdata")
+
+ggplot() + 
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$intercept), aes(x=x,y=y))
+
+ggplot() + 
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$beta), aes(x=x,y=y))
+
+ggplot() + 
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$sigma), aes(x=x,y=y))
+
+amis_kerns = lapply(seq(ncol(amis_w_inla_mod$eta)), function(x){
+  as.data.frame(density(x = amis_w_inla_mod$eta[,x],
+                        weights = amis_w_inla_mod$weight/sum(amis_w_inla_mod$weight), 
+                        kernel = "gaussian")[c(1,2)])
+})
+amis_params = data.frame(a = amis_w_inla_mod$margs$intercept$x[which.max(amis_w_inla_mod$margs$intercept$y)],
+                         b = amis_w_inla_mod$margs$beta$x[which.max(amis_w_inla_mod$margs$beta$y)],
+                         c = amis_kerns[[1]]$x[which.max(amis_kerns[[1]]$y)], 
+                         d = amis_kerns[[2]]$x[which.max(amis_kerns[[2]]$y)])
+amis_params
+mod$params
+ggplot() + 
+  geom_line(data = amis_kerns[[1]],aes(x=x,y=y))
+
+ggplot() + 
+  geom_line(data = amis_kerns[[2]],aes(x=x,y=y))
+
 res = PQR(mod$data$x,mod$data$y,init = rep(0,sum(mod$params!=0)),dom = c(0,1))
 fig1 <- ggplot(res$quantiles, aes(x=x,y=y,color = quant))+
   geom_line() + 
   labs(title="D51",x="x",y="",color = "quantiles") + 
   theme_bw()
 fig1
+
+
 mod = GG_model("D52",n=500)
+init = list(mu = c(0,0),cov = 5*diag(2))
+amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param, 
+                              dq.param, rq.param, fit.inla, 
+                              N_t = seq(25,50,1), N_0 = 25)
+save(amis_w_inla_mod, file = "./sims/d52-pqr-amis-w-inla.Rdata")
+
+ggplot() + 
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$intercept), aes(x=x,y=y))
+
+ggplot() + 
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$beta), aes(x=x,y=y))
+
+ggplot() + 
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$sigma), aes(x=x,y=y))
+
+amis_kerns = lapply(seq(ncol(amis_w_inla_mod$eta)), function(x){
+  as.data.frame(density(x = amis_w_inla_mod$eta[,x],
+                        weights = amis_w_inla_mod$weight/sum(amis_w_inla_mod$weight), 
+                        kernel = "gaussian")[c(1,2)])
+})
+
+amis_kerns[[1]]$x[which.max(amis_kerns[[1]]$y)]
+amis_kerns[[2]]$x[which.max(amis_kerns[[2]]$y)]
+ggplot() + 
+  geom_line(data = amis_kerns[[1]],aes(x=x,y=y))
+
+ggplot() + 
+  geom_line(data = amis_kerns[[2]],aes(x=x,y=y))
+
 res = PQR(mod$data$x,mod$data$y,init = rep(0,sum(mod$params!=0)),dom = c(0,1))
 fig2 <- ggplot(res$quantiles, aes(x=x,y=y,color = quant))+
   geom_line() + 
@@ -93,4 +144,19 @@ fig4 <- ggplot(res$quantiles, aes(x=x,y=y,color = quant))+
   theme_bw()
 fig4
 
+
+
+
+#### ML TESTS #####
+eta = mod$params$a + mod$params$b*mod$data$x
+mu = exp(eta)
+prec.scale = exp(mod$params$c + mod$params$d*mod$data$x)
+r = inla(y ~ x, data = mod$data,
+         scale = exp(mod$params$c + mod$params$d*mod$data$x), family = "gamma",
+         control.family=list(hyper=list(theta=list(initial=log(1),fixed=FALSE))),
+         verbose = FALSE,
+         quantiles=c(0.1, 0.25, 0.5, 0.75, 0.9))
+
+ggplot(as.data.frame(r$marginals.fixed$`(Intercept)`),aes(x=x,y=y)) + 
+  geom_line()
 

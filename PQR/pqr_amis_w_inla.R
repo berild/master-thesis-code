@@ -4,12 +4,12 @@ require(INLABMA)
 require(parallel)
 require(mvtnorm)
 
-dq.rho.lambda <- function(y, x, sigma = init$cov, log =TRUE) {
+dq.param <- function(y, x, sigma = init$cov, log =TRUE) {
   dmvt(y,sigma = sigma, df=3, delta = x, type = "shifted",log=log)
   #dmvnorm(y, mean = x, sigma = sigma, log = log)
 }
 
-rq.rho.lambda <- function(x, sigma = init$cov) {
+rq.param <- function(x, sigma = init$cov) {
   as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
   #as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
