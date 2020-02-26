@@ -12,7 +12,7 @@ prior.param <- function(x, log = TRUE) {
 
 fit.inla <- function(data,eta){
   res = inla(y ~ 1 + x, 
-             data = mod$data,
+             data = data,
              scale = exp(eta[1] + eta[2]*data$x), 
              family = "gamma",
              control.family=list(hyper=list(theta=list(initial=log(1),fixed=FALSE))),
@@ -22,7 +22,8 @@ fit.inla <- function(data,eta){
               dists = list(intercept = res$marginals.fixed[[1]],
                            beta = res$marginals.fixed[[2]],
                            sigma = res$marginals.hyperpar[[1]]),
-              stats = res$summary.fixed))
+              quants = list(intercept = res$summary.fixed[1,3:7],
+                            beta = res$summary.fixed[2,3:7])))
 }
 
 
@@ -40,6 +41,19 @@ calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   return(theta)
 }
 
+calc.quants <- function(quants,weight){
+  weight = weight/sum(weight)
+  new_quants = quants
+  for (i in seq(length(quants))){
+    new_quants[[i]] = rep(0,ncol(quants[[i]]))
+    names(new_quants[[i]]) = colnames(quants[[i]])
+    for (j in seq(nrow(quants[[i]]))){
+      new_quants[[i]] = new_quants[[i]] + weight[j]*quants[[i]][j,]
+    }
+  }
+  return(new_quants)
+}
+
 calc.stats <- function(stats,weight){
   for (i in seq(length(stats))){
     new.stat = c(0,0)
@@ -48,6 +62,23 @@ calc.stats <- function(stats,weight){
     stats[[i]] = new.stat
   }
   return(stats)
+}
+
+store.quants <- function(quant,quants,j,n.prop){
+  if (anyNA(quants)){
+    quants = quant
+    for (i in seq(length(quant))){
+      quants[[i]] = matrix(NA, nrow = n.prop, ncol = length(quant[[i]]))
+      colnames(quants[[i]]) = names(quant[[i]])
+      quants[[i]][j,] = as.numeric(quant[[i]])
+    }
+    return(quants)
+  }else{
+    for (i in seq(length(quant))){
+      quants[[i]][j,] = as.numeric(quant[[i]])
+    }
+    return(quants)
+  }
 }
 
 store.stats <- function(stat,stats,j,n.prop){
@@ -109,7 +140,6 @@ running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
 }
 
 fit.marginals <- function(ws,margs,len = 400){
-  ws = exp(ws - max(ws))
   ws = ws/sum(ws)
   xmin <- quantile(apply(margs[[1]],1,function(X){min(X)}),0.25)
   xmax <- quantile(apply(margs[[1]],1,function(X){max(X)}),0.75)
