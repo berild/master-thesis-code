@@ -15,15 +15,14 @@ fit.inla <- function(data,eta){
              data = data,
              scale = exp(eta[1] + eta[2]*data$x), 
              family = "gamma",
-             control.family=list(hyper=list(theta=list(initial=log(1),fixed=FALSE))),
+             control.family=list(hyper=list(theta=list(initial=log(1),fixed=TRUE))),
              verbose = FALSE,
              quantiles=c(0.1, 0.25, 0.5, 0.75, 0.9))
   return(list(mlik = res$mlik[[1]],
               dists = list(intercept = res$marginals.fixed[[1]],
-                           beta = res$marginals.fixed[[2]],
-                           sigma = res$marginals.hyperpar[[1]]),
-              quants = list(intercept = res$summary.fixed[1,3:7],
-                            beta = res$summary.fixed[2,3:7])))
+                           beta = res$marginals.fixed[[2]]),
+              quants = list(a = res$summary.fixed[1,3:7],
+                            b = res$summary.fixed[2,3:7])))
 }
 
 
@@ -114,6 +113,30 @@ store.post <- function(marg,margs,j,n.prop){
     }
     return(margs)
   }
+}
+
+amis_pqr <- function(eta,weight,quants,data){
+  require(spatstat)
+  amis_kerns = lapply(seq(ncol(eta)), function(x){
+    dens = density(x = eta[,x],
+                   weights = weight/sum(weight), 
+                   kernel = "gaussian")
+    quants = quantile(dens,c(0.1,0.25,0.5,0.75,0.9))
+    return(list(dens = as.data.frame(dens[c(1,2)]), quants = quants))
+  })
+  quants = list(a = quants$a, b = quants$b, f = amis_kerns[[1]]$quants, g = amis_kerns[[2]]$quants)
+  pqr = pqr_inla(x = data$x, a = quants$a, b=quants$b, f = quants$f, g = quants$g)
+  return(list(eta_kern=list(f = amis_kerns[[1]]$dens,g = amis_kerns[[2]]$dens),pqr = pqr, quants=quants))
+}
+
+pqr_inla <- function(x, a, b, f, g){
+  quants = c(0.1,0.25,0.5,0.75,0.9)
+  res = data.frame(x = NA, y = NA, quants = NA)
+  for (i in seq(length(a))){
+    tmpquant = exp(a[i] + b[i]*x)*qgamma(quants[i],shape = exp(f[i] + g[i]*x),scale = 1)/exp(f[i] + g[i]*x)
+    res = rbind(res,data.frame(x = x, y = tmpquant, quants = rep(toString(quants[i]),length(x))))
+  }
+  return(res[-1,])
 }
 
 running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
