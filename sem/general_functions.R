@@ -11,7 +11,7 @@ prior.rho.lambda <- function(x, log = TRUE) {
 
 
 fit.inla <- function(data,eta){
-  res <- try(sac.inla(form, d = as.data.frame(turnout), W.rho = W, W.lambda = W,
+  res <- sac.inla(form, d = as.data.frame(turnout), W.rho = W, W.lambda = W,
                       fhyper = list(prec = list(param = c(0.01, 0.01))),
                       rho = eta[1],
                       lambda = eta[2],
@@ -26,9 +26,9 @@ fit.inla <- function(data,eta){
                       control.mode = list(theta = log(0.2), restart = TRUE),
                       improve = FALSE,
                       verbose = FALSE
-  ))
+  )
   logdet <- res$logdet
-  res <- try(inla.rerun(res))
+  res <- inla.rerun(res)
   res$mlik <- res$mlik + 0.5 * logdet
   return(list(mlik = res$mlik[[1]],
               dists = list(intercept = res$marginals.fixed[[1]],
@@ -121,7 +121,6 @@ running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
 }
 
 fit.marginals <- function(ws,margs,len = 400){
-  ws = exp(ws - max(ws))
   ws = ws/sum(ws)
   xmin <- quantile(apply(margs[[1]],1,function(X){min(X)}),0.25)
   xmax <- quantile(apply(margs[[1]],1,function(X){max(X)}),0.75)

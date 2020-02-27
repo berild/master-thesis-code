@@ -41,8 +41,15 @@ update.delta.weight <- function(delta,weight,N_t,eta,theta,t,mlik,prior,d.prop){
 
 par.amis <- function(x,data, theta, t, N_0, N_t, N_tmp,
                      prior, d.prop, r.prop, fit.inla){
-  eta = r.prop(theta$a.mu[t+1,], sigma = theta$a.cov[,,t+1])
-  mod = fit.inla(data = data ,eta = eta)
+  INLA_crash = T
+  while(INLA_crash){
+    tryCatch({
+      eta = r.prop(theta$a.mu[t+1,], sigma = theta$a.cov[,,t+1])
+      mod = fit.inla(data = data ,eta = eta)
+      INLA_crash = F 
+    },error=function(e){
+    },finally={})
+  }
   if (t==0){
     delta = N_0*d.prop(y = eta, x = theta$a.mu[1,], sigma = theta$a.cov[,,1], log = FALSE)
     weight = mod$mlik + prior(eta) - d.prop(y = eta, x = theta$a.mu[1,], sigma = theta$a.cov[,,1])
@@ -119,9 +126,10 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     weight[1:(N_tmp - N_t[t])] = delta.weight$weight
     theta = calc.theta(theta,weight,eta,i_tot,t+2)
   }
+  weight = weight - max(weight)
   return(list(eta = eta,
               theta = theta,
               margs = lapply(margs, function(x){fit.marginals(weight,x)}),
-              weight = weight,
+              weight = weight/sum(weight),
               times = times))
 }
