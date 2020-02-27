@@ -123,10 +123,14 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     theta = calc.theta(theta,weight,eta,i_tot,t+2)
   }
   weight = exp(weight - max(weight))
+  quants = calc.quants(quants,weight)
+  tmp_amis = amis_pqr(eta,weight,quants,data)
   return(list(eta = eta,
               theta = theta,
               margs = lapply(margs, function(x){fit.marginals(weight,x)}),
-              quants = calc.quants(quants,weight),
+              quants = tmp_amis$quants,
+              eta_kern = tmp_amis$eta_kern,
+              pqr = tmp_amis$pqr,
               weight = weight,
               times = times))
 }
