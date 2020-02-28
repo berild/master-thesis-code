@@ -5,3 +5,4 @@ sims/d54-pqr-amis-w-inla.Rdata filter=lfs diff=lfs merge=lfs -text
 sims/ImmunogG-pqr-amis-w-inla.Rdata filter=lfs diff=lfs merge=lfs -text
 sims/sem-amis-w-inla.Rdata filter=lfs diff=lfs merge=lfs -text
 sims/d51-pqr-amis-w-inla.Rdata filter=lfs diff=lfs merge=lfs -text
+PQR/pqr-models.Rdata filter=lfs diff=lfs merge=lfs -text
