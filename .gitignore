@@ -4,7 +4,7 @@
 
 # Session Data files
 .RData
-*/*.Rdata
+
 
 # User-specific files
 .Ruserdata
@@ -43,4 +43,3 @@ vignettes/*.pdf
 literature
 figures
 data
-sims
