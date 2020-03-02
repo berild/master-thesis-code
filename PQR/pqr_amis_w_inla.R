@@ -50,10 +50,10 @@ par.amis <- function(x,data, theta, t, N_0, N_t, N_tmp,
     delta = N_0*d.prop(y = eta, x = theta$a.mu[1,], sigma = theta$a.cov[,,1],log = FALSE) + calc.delta(N_t,eta,theta, t, d.prop)
     weight = mod$mlik + prior(eta)- log(delta/N_tmp)
   }
-  return(list(mlik = mod$mlik, dists = mod$dists, quants = mod$quants, eta = eta, delta = delta, weight = weight, times = Sys.time()))
+  return(list(mlik = mod$mlik, dists = mod$dists, eta = eta, delta = delta, weight = weight, times = Sys.time()))
 }
 
-amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(20,20), N_0 = NA){
+amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(20,20), N_0 = NA, quants = NA){
   if (anyNA(N_0)){
     N_0 = round(sum(N_t)/2) 
   }
@@ -76,7 +76,6 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   i_tot = 0
   pb <- txtProgressBar(min = 0, max = N_tot, style = 3)
   margs = NA
-  quants = NA
   starttime = Sys.time()
   N_tmp = N_0
   t = 0
@@ -89,7 +88,6 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     setTxtProgressBar(pb, i_tot)
     i_tot = i_tot + 1
     margs = store.post(ele$dists,margs,i_tot,N_tot)
-    quants = store.quants(ele$quants,quants,i_tot,N_tot)
     eta[i_tot,] = ele$eta
     mlik[i_tot] = ele$mlik
     delta[i_tot] = ele$delta
@@ -110,7 +108,6 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
       setTxtProgressBar(pb, i_tot)
       i_tot = i_tot + 1
       margs = store.post(ele$dists,margs,i_tot,N_tot)
-      quants = store.quants(ele$quants,quants,i_tot,N_tot)
       eta[i_tot,] = ele$eta
       mlik[i_tot] = ele$mlik
       delta[i_tot] = ele$delta
@@ -123,13 +120,13 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     theta = calc.theta(theta,weight,eta,i_tot,t+2)
   }
   weight = exp(weight - max(weight))
-  quants = calc.quants(quants,weight)
-  tmp_amis = amis_pqr(eta,weight,quants,data)
+  margs = lapply(margs, function(x){fit.marginals(weight,x)})
+  eta_kern = amis_kde(eta,weight)
+  pqr = pqr_inla(data$x,margs[[1]]$x[which.max(margs[[1]]$x$y)] ,margs[[2]]$x[which.max(margs[[2]]$y)], eta_kern[[1]]$dens$x[which.max(eta_kern[[1]]$dens$y)], eta_kern[[2]]$dens$x[which.max(eta_kern[[2]]$dens$y)],quants)
   return(list(eta = eta,
               theta = theta,
               margs = lapply(margs, function(x){fit.marginals(weight,x)}),
-              quants = tmp_amis$quants,
-              eta_kern = tmp_amis$eta_kern,
+              eta_kern = eta_kern,
               pqr = tmp_amis$pqr,
               weight = weight,
               times = times))
