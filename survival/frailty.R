@@ -7,11 +7,12 @@ library(spatstat)
 library(survival)
 source("./survival/frailty_general_functions.R")
 source("./survival/frailty_amis_w_inla.R")
+
 variant  = 0
 data(rats)
 n = 100
 
-u = rep(rgamma(1,shape = 1, scale = 1), each = 100)
+u = rep(rgamma(10,shape = 1, rate = 1), each = 10)
 
 alpha = 1.1
 beta = 2.2
@@ -30,9 +31,7 @@ init = list(mu = 1,cov = 1)
 
 amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.frailty, 
                               dq.frailty, rq.frailty, fit.inla, 
-                              N_t = seq(25,26,1), N_0 = 25, kde = T)
-amis_w_inla_mod$params = list(intercept = alpha, beta = beta)
+                              N_t = seq(25,50,1)*10, N_0 = 250, kde = T)
+amis_w_inla_mod$params = list(intercept = 1, beta = beta)
 save(amis_w_inla_mod,file = "./sims/test-frailty-amis-w-inla.Rdata")
 
-formula = y ~ f(i, model="iid",initial=0, fixed=T) +
-  f(j, w, copy="i", fixed=FALSE)

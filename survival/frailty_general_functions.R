@@ -6,18 +6,26 @@ require(mvtnorm)
 require(MASS)
 
 prior.frailty <- function(x, log = TRUE) {
-  sum(dgamma(x,shape = 3,scale = 3,log = log))
+  sum(dgamma(x,shape = 1,rate = 1,log = log))
 }
 
+dq.param <- function(y, eta, log =TRUE) {
+  sum(dgamma(y,rate = eta, shape = eta,log = log))
+}
+
+rq.param<- function(eta,n) {
+  as.vector(rgamma(n = n,rate=eta,shape = eta))
+}
 
 fit.inla <- function(data,eta){
-  data$oset = log(eta[data$idx])
+  param = rq.param(eta,n = length(unique(data$idx)))
+  data$oset = log(param[data$idx])
   formula = inla.surv(y,event) ~ 1 + x + offset(oset)
   res=inla(formula,
            family ="weibullsurv",
            data=data,
            control.family = list(list(variant = variant)))
-  return(list(mlik = res$mlik[[1]],
+  return(list(mlik = res$mlik[[1]] + dq.param(param,eta),
               dists = list(intercept = res$marginals.fixed[[1]],
                            beta = res$marginals.fixed[[2]])))
 }
@@ -25,8 +33,8 @@ fit.inla <- function(data,eta){
 
 calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   weight[1:i_tot] = exp(weight[1:i_tot] - max(weight[1:i_tot]))
-  theta$a.mu[i_cur] = mean(rowSums(eta[1:i_tot,]*weight[1:i_tot])/sum(weight[1:i_tot]))
-    theta$a.cov[i_cur] =  mean(weight[1:i_tot]*rowSums(eta[1:i_tot,]-theta$a.mu[i_cur])^2/(sum(weight[1:i_tot])))
+  theta$a.mu[i_cur] = sum(eta[1:i_tot]*(weight[1:i_tot]/sum(weight[1:i_tot])))
+    theta$a.cov[i_cur] = sum((eta[1:i_tot]-theta$a.mu[i_cur])^2*(weight[1:i_tot]/(sum(weight[1:i_tot]))))
   return(theta)
 }
 
@@ -77,11 +85,17 @@ store.post <- function(marg,margs,j,n.prop){
 }
 
 amis_kde <- function(eta,weight){
-  return(lapply(seq(ncol(eta)), function(x){
-    as.data.frame(density(x = eta[,x],
+  if (is.null(ncol(eta))){
+    return(as.data.frame(density(x = eta,
                           weights = weight/sum(weight), 
-                          kernel = "gaussian")[c(1,2)])
-  }))
+                          kernel = "gaussian")[c(1,2)]))
+  }else{
+    return(lapply(seq(ncol(eta)), function(x){
+      as.data.frame(density(x = eta[,x],
+                            weights = weight/sum(weight), 
+                            kernel = "gaussian")[c(1,2)])
+    }))
+  }
 }
 
 pqr_truth_lines <- function(data,params,type){

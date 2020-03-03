@@ -8,15 +8,15 @@ dq.frailty <- function(y, x, sigma = init$cov, log =TRUE) {
   rate = x/sigma
   shape = x^2/sigma
   sum(dgamma(y,rate = rate, shape = shape,log = log))
-  #dmvt(y,sigma = sigma, df=3, delta = x, type = "shifted",log=log)
-  #dmvnorm(y, mean = x, sigma = sigma, log = log)
+  # dmvt(y, sigma = as.matrix(sigma), df=3, delta = x, type = "shifted",log=log)
+  # dmvnorm(y, mean = x, sigma = sigma, log = log)
 }
 
-rq.frailty <- function(x, sigma = init$cov,n) {
+rq.frailty <- function(x, sigma = init$cov) {
   rate = x/sigma
   shape = x^2/sigma
-  rgamma(n = n,rate=rate,shape = shape)
-  #as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
+  rgamma(1,rate=rate,shape = shape)
+  #as.vector(rmvt(1,sigma = as.matrix(sigma), df=3, delta = x, type = "shifted"))
   #as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
 
@@ -34,8 +34,8 @@ update.delta.weight <- function(delta,weight,N_t,eta,theta,t,mlik,prior,d.prop){
   for (l in seq(t)){
     for (i in seq(N_t[l])){
       i_tmp = i_tmp + 1
-      delta[i_tmp] = delta[i_tmp] + N_t[l]*d.prop(y = eta[i_tmp,], x = theta$a.mu[t+1], sigma = theta$a.cov[t+1], log = FALSE)
-      weight[i_tmp] = mlik[i_tmp] + prior(eta[i_tmp,]) - log(delta[i_tmp]/N_tmp)
+      delta[i_tmp] = delta[i_tmp] + N_t[l]*d.prop(y = eta[i_tmp], x = theta$a.mu[t+1], sigma = theta$a.cov[t+1], log = FALSE)
+      weight[i_tmp] = mlik[i_tmp] + prior(eta[i_tmp]) - log(delta[i_tmp]/N_tmp)
     }
   }
   return(list(
@@ -47,7 +47,7 @@ update.delta.weight <- function(delta,weight,N_t,eta,theta,t,mlik,prior,d.prop){
 
 par.amis <- function(x,data, theta, t, N_0, N_t, N_tmp,
                      prior, d.prop, r.prop, fit.inla){
-  eta = r.prop(theta$a.mu[t+1], sigma = theta$a.cov[t+1],n = length(unique(data$idx)))
+  eta = r.prop(theta$a.mu[t+1], sigma = theta$a.cov[t+1])
   mod = fit.inla(data = data ,eta = eta)
   if (t==0){
     delta = N_0*d.prop(y = eta, x = theta$a.mu[1], sigma = theta$a.cov[1], log = FALSE)
@@ -70,7 +70,7 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   }
   N_tot = N_0 + sum(N_t)
   mlik = numeric(N_tot)
-  eta = matrix(NA, ncol = length(unique(data$idx)), nrow = N_tot)
+  eta = numeric(N_tot)
   delta = numeric(N_tot)
   weight = numeric(N_tot)
   times = numeric(N_tot)
@@ -87,16 +87,16 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   t = 0
   res = list()
   res$data = data
-  amis.list = lapply(seq(N_0),function(x){
+  amis.list = mclapply(seq(N_0),function(x){
     par.amis(x, data, theta, t, N_0, 
              N_t, N_tmp, prior, d.prop,
              r.prop, fit.inla)
-  })#, mc.set.seed = TRUE, mc.cores = ncores)
+  }, mc.set.seed = TRUE)
   for (ele in amis.list){
     setTxtProgressBar(pb, i_tot)
     i_tot = i_tot + 1
     margs = store.post(ele$dists,margs,i_tot,N_tot)
-    eta[i_tot,] = ele$eta
+    eta[i_tot] = ele$eta
     mlik[i_tot] = ele$mlik
     delta[i_tot] = ele$delta
     weight[i_tot] = ele$weight
@@ -111,18 +111,18 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
       par.amis(x, data, theta, t, N_0, 
                N_t, N_tmp, prior, d.prop,
                r.prop, fit.inla)
-    },mc.set.seed = TRUE, mc.cores = ncores)
+    },mc.set.seed = TRUE)
     for (ele in amis.list){
       setTxtProgressBar(pb, i_tot)
       i_tot = i_tot + 1
       margs = store.post(ele$dists,margs,i_tot,N_tot)
-      eta[i_tot,] = ele$eta
+      eta[i_tot] = ele$eta
       mlik[i_tot] = ele$mlik
       delta[i_tot] = ele$delta
       weight[i_tot] = ele$weight
       times[i_tot] = as.numeric(difftime(ele$times,starttime,units = "secs"))
     }
-    delta.weight = update.delta.weight(delta[1:(N_tmp - N_t[t])],weight[1:(N_tmp - N_t[t])],N_t = c(N_0,N_t),eta[1:(N_tmp - N_t[t]),],theta,t,mlik[1:(N_tmp - N_t[t])],prior,d.prop)
+    delta.weight = update.delta.weight(delta[1:(N_tmp - N_t[t])],weight[1:(N_tmp - N_t[t])],N_t = c(N_0,N_t),eta[1:(N_tmp - N_t[t])],theta,t,mlik[1:(N_tmp - N_t[t])],prior,d.prop)
     delta[1:(N_tmp - N_t[t])] = delta.weight$delta
     weight[1:(N_tmp - N_t[t])] = delta.weight$weight
     theta = calc.theta(theta,weight,eta,i_tot,t+2)

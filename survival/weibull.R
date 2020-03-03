@@ -46,6 +46,6 @@ fit.inla <- function(data,eta){
 
 plot_gamma <- function(alpha, n){
   return(ggplot() + 
-           geom_line(data = data.frame(x = seq(0,3*alpha*alpha,length.out = n),y = dgamma(seq(0,3*alpha*alpha,length.out = n),scale =alpha, shape = alpha)), aes(x = x, y = y)))
+           geom_line(data = data.frame(x = seq(0,2*alpha*alpha,length.out = n),y = dgamma(seq(0,3*alpha*alpha,length.out = n),rate =alpha, shape = alpha)), aes(x = x, y = y)))
 }
-plot_gamma(alpha = 3, n =20)
+plot_gamma(alpha = 2, n =200)
