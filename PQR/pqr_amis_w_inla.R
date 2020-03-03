@@ -53,12 +53,12 @@ par.amis <- function(x,data, theta, t, N_0, N_t, N_tmp,
   return(list(mlik = mod$mlik, dists = mod$dists, eta = eta, delta = delta, weight = weight, times = Sys.time()))
 }
 
-amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(20,20), N_0 = NA, quants = NA){
+amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(20,20), N_0 = NA, pqr = NA, kde = NA){
   if (anyNA(N_0)){
     N_0 = round(sum(N_t)/2) 
   }
   if (detectCores()>10){
-    ncores = 20
+    ncores = 8
   }else{
     ncores = detectCores()
   }
@@ -79,6 +79,8 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   starttime = Sys.time()
   N_tmp = N_0
   t = 0
+  res = list()
+  res$data = data
   amis.list = mclapply(seq(N_0),function(x){
     par.amis(x, data, theta, t, N_0, 
              N_t, N_tmp, prior, d.prop,
@@ -119,15 +121,17 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     weight[1:(N_tmp - N_t[t])] = delta.weight$weight
     theta = calc.theta(theta,weight,eta,i_tot,t+2)
   }
-  weight = exp(weight - max(weight))
-  margs = lapply(margs, function(x){fit.marginals(weight,x)})
-  eta_kern = amis_kde(eta,weight)
-  pqr = pqr_inla(data$x,margs[[1]]$x[which.max(margs[[1]]$x$y)] ,margs[[2]]$x[which.max(margs[[2]]$y)], eta_kern[[1]]$dens$x[which.max(eta_kern[[1]]$dens$y)], eta_kern[[2]]$dens$x[which.max(eta_kern[[2]]$dens$y)],quants)
-  return(list(eta = eta,
-              theta = theta,
-              margs = lapply(margs, function(x){fit.marginals(weight,x)}),
-              eta_kern = eta_kern,
-              pqr = tmp_amis$pqr,
-              weight = weight,
-              times = times))
+  res$eta = eta
+  res$times = times
+  res$theta = theta
+  res$weight = exp(weight - max(weight))
+  res$margs = lapply(margs, function(x){fit.marginals(res$weight,x)})
+  if ((!anyNA(kde))|(!anyNA(pqr))){
+    res$eta_kern = amis_kde(res$eta,res$weight) 
+  }
+  if (!anyNA(pqr)){
+    res$pqr = pqr_inla(data,res$margs,res$eta_kern,type = pqr) 
+  }
+  return(res)
 }
+

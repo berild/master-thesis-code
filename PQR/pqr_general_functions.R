@@ -10,7 +10,7 @@ prior.param <- function(x, log = TRUE) {
 }
 
 
-fit.inla.gg <- function(data,eta){
+fit.inla.ggamma <- function(data,eta){
   res = inla(y ~ 1 + x, 
              data = data,
              scale = exp(eta[1] + eta[2]*data$x), 
@@ -18,8 +18,8 @@ fit.inla.gg <- function(data,eta){
              control.family=list(hyper=list(theta=list(initial=log(1),fixed=TRUE))),
              verbose = FALSE)
   return(list(mlik = res$mlik[[1]],
-              dists = list(intercept = res$marginals.fixed[[1]],
-                           beta = res$marginals.fixed[[2]])))
+              dists = list(a = res$marginals.fixed[[1]],
+                           b = res$marginals.fixed[[2]])))
 }
 
 
@@ -31,8 +31,8 @@ fit.inla.gaussian <- function(data,eta){
              control.family = list(hyper = list(prec = list(initial = log(1), fixed = TRUE))),
              verbose = FALSE)
   return(list(mlik = res$mlik[[1]],
-              dists = list(intercept = res$marginals.fixed[[1]],
-                           beta = res$marginals.fixed[[2]])))
+              dists = list(a = res$marginals.fixed[[1]],
+                           b = res$marginals.fixed[[2]])))
 }
 
 calc.theta <- function(theta,weight,eta,i_tot,i_cur){
@@ -96,20 +96,43 @@ store.post <- function(marg,margs,j,n.prop){
 }
 
 amis_kde <- function(eta,weight){
-  amis_kerns = lapply(seq(ncol(eta)), function(x){
-    dens = density(x = eta[,x],
+  return(lapply(seq(ncol(eta)), function(x){
+    as.data.frame(density(x = eta[,x],
                    weights = weight/sum(weight), 
-                   kernel = "gaussian")
-    return(list(dens = as.data.frame(dens[c(1,2)]),col = x))
-  })
-  return(amis_kern)
+                   kernel = "gaussian")[c(1,2)])
+  }))
 }
 
-pqr_inla <- function(x, a, b, f, g,quants){
+pqr_truth_lines <- function(data,params,type){
+  quants = c(0.1,0.25,0.5,0.75,0.9)
+  mu = params[[1]] + params[[2]]*data$x
+  tau = exp(params[[3]] + params[[4]]*data$x)
   res = data.frame(x = NA, y = NA, quants = NA)
   for (i in seq(length(quants))){
-    tmpquant = exp(a + b*x)*qgamma(quants[i],shape = exp(f + g*x),scale = 1)/exp(f + g*x)
-    res = rbind(res,data.frame(x = x, y = tmpquant, quants = rep(toString(quants[i]),length(x))))
+    if (type == "gaussian"){
+      tmpy = qnorm(quants[i],mean = mu,sd = 1/sqrt(tau))
+    }else if (type == "gamma"){
+      tmpy = exp(mu)*qgamma(quants[i], shape = tau, scale = 1)/tau 
+    }
+    res = rbind(res,data.frame(x = data$x, y = tmpy, quants = rep(toString(quants[i]),length(data$x))))
+  }
+  return(res[-1,])
+}
+
+pqr_inla <- function(data,margs,eta_kern,type){
+  quants = c(0.1,0.25,0.5,0.75,0.9)
+  params = c(sapply(margs, function(x){x$x[which.max(x$y)]}),
+             sapply(eta_kern, function(x){x$x[which.max(x$y)]}))
+  mu = params[1] + params[2]*data$x
+  tau = exp(params[3] + params[4]*data$x)
+  res = data.frame(x = NA, y = NA, quants = NA)
+  for (i in seq(length(quants))){
+    if (type == "gaussian"){
+      tmpy = qnorm(quants[i],mean = mu,sd = 1/sqrt(tau))
+    }else if (type == "gamma"){
+      tmpy = exp(mu)*qgamma(quants[i], shape = tau, scale = 1)/tau 
+    }
+    res = rbind(res,data.frame(x = data$x, y = tmpy, quants = rep(toString(quants[i]),length(data$x))))
   }
   return(res[-1,])
 }
