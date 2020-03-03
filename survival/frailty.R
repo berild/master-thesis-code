@@ -33,3 +33,6 @@ amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.frailty,
                               N_t = seq(25,26,1), N_0 = 25, kde = T)
 amis_w_inla_mod$params = list(intercept = alpha, beta = beta)
 save(amis_w_inla_mod,file = "./sims/test-frailty-amis-w-inla.Rdata")
+
+formula = y ~ f(i, model="iid",initial=0, fixed=T) +
+  f(j, w, copy="i", fixed=FALSE)
