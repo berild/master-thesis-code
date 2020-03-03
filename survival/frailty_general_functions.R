@@ -25,15 +25,8 @@ fit.inla <- function(data,eta){
 
 calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   weight[1:i_tot] = exp(weight[1:i_tot] - max(weight[1:i_tot]))
-  for (i in seq(ncol(eta))){
-    theta$a.mu[i_cur,i] = sum(eta[1:i_tot,i]*weight[1:i_tot])/sum(weight[1:i_tot])
-  }
-  for (i in seq(ncol(eta))){
-    for (j in seq(i,ncol(eta))){
-      theta$a.cov[i,j,i_cur] = theta$a.cov[j,i,i_cur] = sum(weight[1:i_tot]*(eta[1:i_tot,i]-theta$a.mu[i_cur,i])*
-                                                              (eta[1:i_tot,j]-theta$a.mu[i_cur,j]))/(sum(weight[1:i_tot]))
-    }
-  }
+  theta$a.mu[i_cur] = mean(rowSums(eta[1:i_tot,]*weight[1:i_tot])/sum(weight[1:i_tot]))
+    theta$a.cov[i_cur] =  mean(weight[1:i_tot]*rowSums(eta[1:i_tot,]-theta$a.mu[i_cur])^2/(sum(weight[1:i_tot])))
   return(theta)
 }
 

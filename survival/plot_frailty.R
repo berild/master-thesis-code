@@ -20,4 +20,3 @@ ggplot() +
   geom_line(data = amis_w_inla_mod$eta_kern[[9]], aes(x=x,y=y,color = toString(9))) + 
   geom_line(data = amis_w_inla_mod$eta_kern[[10]], aes(x=x,y=y,color = toString(10))) +
   labs(color = "")
-
