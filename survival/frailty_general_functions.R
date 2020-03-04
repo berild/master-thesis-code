@@ -9,9 +9,9 @@ prior.frailty <- function(x, log = TRUE) {
   sum(dgamma(x,shape = 1,rate = 1,log = log))
 }
 
-dq.param <- function(y, eta, log =TRUE) {
-  sum(dgamma(y,rate = eta, shape = eta,log = log))
-}
+# dq.param <- function(y, eta, log =TRUE) {
+#   sum(dgamma(y,rate = eta, shape = eta,log = log))
+# }
 
 rq.param<- function(eta,n) {
   as.vector(rgamma(n = n,rate=eta,shape = eta))
@@ -25,7 +25,20 @@ fit.inla <- function(data,eta){
            family ="weibullsurv",
            data=data,
            control.family = list(list(variant = variant)))
-  return(list(mlik = res$mlik[[1]] + dq.param(param,eta),
+  return(list(mlik = res$mlik[[1]],
+              dists = list(intercept = res$marginals.fixed[[1]],
+                           beta = res$marginals.fixed[[2]])))
+}
+
+fit.inla.k <- function(data,eta){
+  param = rq.param(eta,n = length(unique(data$idx)))
+  data$oset = log(param[data$idx])
+  formula = inla.surv(y,event) ~ 1 + rx + offset(oset)
+  res=inla(formula,
+           family ="weibullsurv",
+           data=data,
+           control.family = list(list(variant = variant)))
+  return(list(mlik = res$mlik[[1]],
               dists = list(intercept = res$marginals.fixed[[1]],
                            beta = res$marginals.fixed[[2]])))
 }
