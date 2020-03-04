@@ -100,20 +100,62 @@ init = list(mu = c(0,0),cov = 5*diag(2))
 # amis_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gaussian")
 # save(amis_w_inla_mod, file = "./sims/d54-gaussian-pqr-amis-w-inla.Rdata")
 
-mod = ggamma__model("D54",n=500)
-amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param, 
-                              dq.param, rq.param, fit.inla.ggamma, 
-                              N_t = seq(25,50,1)*10, N_0 = 250,
-                              pqr = "gamma",kde = T)
-amis_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gamma")
-save(amis_w_inla_mod, file = "./sims/d54-gamma-pqr-amis-w-inla.Rdata")
+# mod = ggamma__model("D54",n=500)
+# amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param, 
+#                               dq.param, rq.param, fit.inla.ggamma, 
+#                               N_t = seq(25,50,1)*10, N_0 = 250,
+#                               pqr = "gamma",kde = T)
+# amis_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gamma")
+# save(amis_w_inla_mod, file = "./sims/d54-gamma-pqr-amis-w-inla.Rdata")
+# 
+# 
+# # ImmunogG data
+# data("ImmunogG")
+# amis_w_inla_mod = amis.w.inla(data = list(x=ImmunogG$Age,y = ImmunogG$IgG), 
+#                               init = init, prior.param, 
+#                               dq.param, rq.param, fit.inla.ggamma, 
+#                               N_t = seq(25,50,1)*10, N_0 = 250,
+#                               pqr = "gamma",kde = T)
+# save(amis_w_inla_mod, file = "./sims/ImmunogG-gamma-pqr-amis-w-inla.Rdata")
 
 
-# ImmunogG data
-data("ImmunogG")
-amis_w_inla_mod = amis.w.inla(data = list(x=ImmunogG$Age,y = ImmunogG$IgG), 
-                              init = init, prior.param, 
-                              dq.param, rq.param, fit.inla.ggamma, 
+# data = read.table("~/skole/master-thesis-code/data/1880-2020-both-global-monthly.txt",
+#                   sep = ",", header=T, skip=4)
+# ggplot(data, aes(x=Year,y=Value)) +geom_point()
+# 
+# data = read.table("~/skole/master-thesis-code/data/1880-2020-land-global-monthly.txt",
+#                   sep = ",", header=T, skip=4)
+# ggplot(data, aes(x=Year,y=Value)) +geom_point()
+# 
+# data = read.table("~/skole/master-thesis-code/data/1880-2020-ocean-global-monthly.txt",
+#                   sep = ",", header=T, skip=4)
+# ggplot(data, aes(x=Year,y=Value)) +geom_point()
+
+
+load(file = "./PQR/1880-2020-both-northen-monthly.Rdata")
+amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.param,
+                              dq.param, rq.param, fit.inla.gaussian,
                               N_t = seq(25,50,1)*10, N_0 = 250,
-                              pqr = "gamma",kde = T)
-save(amis_w_inla_mod, file = "./sims/ImmunogG-gamma-pqr-amis-w-inla.Rdata")
+                              pqr = "gaussian",kde = T)
+save(amis_w_inla_mod, file = "./sims/both-northern-monthly-gamma-pqr-amis-w-inla.Rdata")
+
+# data = read.table("~/skole/master-thesis-code/data/1880-2020-land-northen-monthly.txt",
+#                   sep = ",", header=T, skip=4)
+# ggplot(data, aes(x=Year,y=Value)) +geom_point()
+# 
+# data = read.table("~/skole/master-thesis-code/data/1880-2020-ocean-northen-monthly.txt",
+#                   sep = ",", header=T, skip=4)
+# ggplot(data, aes(x=Year,y=Value)) +geom_point()
+# 
+# 
+# data = read.table("~/skole/master-thesis-code/data/1880-2020-both-southern-monthly.txt",
+#                   sep = ",", header=T, skip=4)
+# ggplot(data, aes(x=Year,y=Value)) +geom_point()
+# 
+# data = read.table("~/skole/master-thesis-code/data/1880-2020-land-southern-monthly.txt",
+#                   sep = ",", header=T, skip=4)
+# ggplot(data, aes(x=Year,y=Value)) +geom_point()
+# 
+# data = read.table("~/skole/master-thesis-code/data/1880-2020-ocean-southern-monthly.txt",
+#                   sep = ",", header=T, skip=4)
+# ggplot(data, aes(x=Year,y=Value)) +geom_point()
