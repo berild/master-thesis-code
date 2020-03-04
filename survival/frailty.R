@@ -17,7 +17,7 @@ u = rep(rgamma(10,shape = 1, rate = 1), each = 10)
 alpha = 1.1
 beta = 2.2
 x = c(scale(runif(n)))
-eta = 1+beta*x + u
+eta = 1+beta*x + log(u)
 lambda = exp(eta)
 
 y = rweibull(n,
@@ -31,7 +31,7 @@ init = list(mu = 1,cov = 1)
 
 amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.frailty, 
                               dq.frailty, rq.frailty, fit.inla, 
-                              N_t = seq(25,50,1)*10, N_0 = 250, kde = T)
+                              N_t = seq(25,30,1)*10, N_0 = 250, kde = T)
 amis_w_inla_mod$params = list(intercept = 1, beta = beta)
 save(amis_w_inla_mod,file = "./sims/test-frailty-amis-w-inla.Rdata")
 
