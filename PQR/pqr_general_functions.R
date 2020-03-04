@@ -24,6 +24,7 @@ fit.inla.ggamma <- function(data,eta){
 
 
 fit.inla.gaussian <- function(data,eta){
+  browser()
   res = inla(y ~ 1 + x,
              data = data, 
              family = "gaussian",
