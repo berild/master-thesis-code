@@ -9,25 +9,41 @@ prior.frailty <- function(x, log = TRUE) {
   sum(dgamma(x,shape = 1,rate = 1,log = log))
 }
 
-# dq.param <- function(y, eta, log =TRUE) {
-#   sum(dgamma(y,rate = eta, shape = eta,log = log))
-# }
+dq.param <- function(y, eta, log =TRUE) {
+  sum(dgamma(y,rate = eta, shape = eta,log = log))
+}
 
 rq.param<- function(eta,n) {
   as.vector(rgamma(n = n,rate=eta,shape = eta))
 }
 
 fit.inla <- function(data,eta){
-  param = rq.param(eta,n = length(unique(data$idx)))
-  data$oset = log(param[data$idx])
-  formula = inla.surv(y,event) ~ 1 + x + offset(oset)
-  res=inla(formula,
-           family ="weibullsurv",
-           data=data,
-           control.family = list(list(variant = variant)))
-  return(list(mlik = res$mlik[[1]],
-              dists = list(intercept = res$marginals.fixed[[1]],
-                           beta = res$marginals.fixed[[2]])))
+  margs = NA
+  weight = numeric(10)
+  formula = inla.surv(y,event) ~ 1 + x + offset(log(oset))
+  for (i in seq(10)){
+    INLA_crash = T
+    while(INLA_crash){
+      tryCatch({
+        param = rq.param(eta,n = length(unique(data$idx)))
+        data$oset = param[data$idx]
+        res=inla(formula,
+                 family ="weibullsurv",
+                 data=data,
+                 control.family = list(list(variant = variant)))
+        INLA_crash = F 
+      },error=function(e){
+      },finally={})
+    }
+    margs = store.post(list(intercept = res$marginals.fixed[[1]],
+                            beta = res$marginals.fixed[[2]]),
+                       margs,i,10)
+    weight[i] = res$mlik[[1]] + dq.param(data$oset,eta)
+  }
+  weight = exp(weight- max(weight))
+  margs = lapply(margs, function(x){fit.marginals(weight,x)})
+  return(list(mlik = log(mean(weight)),
+              dists = margs))
 }
 
 fit.inla.k <- function(data,eta){
