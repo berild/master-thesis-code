@@ -42,7 +42,7 @@ fit.inla <- function(data,eta){
   }
   weight = exp(weight- max(weight))
   margs = lapply(margs, function(x){fit.marginals(weight,x)})
-  return(list(mlik = log(mean(weight)),
+  return(list(mlik = log(sum(weight)),
               dists = margs))
 }
 
