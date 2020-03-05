@@ -5,13 +5,13 @@ require(parallel)
 require(mvtnorm)
 
 dq.param <- function(y, x, sigma = init$cov, log =TRUE) {
-  dmvt(y,sigma = sigma, df=3, delta = x, type = "shifted",log=log)
-  #dmvnorm(y, mean = x, sigma = sigma, log = log)
+  #dmvt(y,sigma = sigma, df=3, delta = x, type = "shifted",log=log)
+  dmvnorm(y, mean = x, sigma = sigma, log = log)
 }
 
 rq.param <- function(x, sigma = init$cov) {
-  as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
-  #as.vector(rmvnorm(1, mean = x, sigma = sigma))
+  #as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
+  as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
 
 calc.delta <- function(N_t,eta,theta,t,d.prop){
@@ -41,17 +41,15 @@ update.delta.weight <- function(delta,weight,N_t,eta,theta,t,mlik,prior,d.prop){
 
 par.amis <- function(x,data, theta, t, N_0, N_t, N_tmp,
                      prior, d.prop, r.prop, fit.inla){
-  # INLA_crash = TRUE
-  # while(INLA_crash){
-  #   tryCatch({
-  #     eta = r.prop(theta$a.mu[t+1,], sigma = theta$a.cov[,,t+1])
-  #     mod = fit.inla(data = data ,eta = eta)
-  #     INLA_crash = F 
-  #   },error=function(e){
-  #   },finally={})
-  # }
-  eta = r.prop(theta$a.mu[t+1,], sigma = theta$a.cov[,,t+1])
-  mod = fit.inla(data = data ,eta = eta)
+  INLA_crash = TRUE
+  while(INLA_crash){
+    tryCatch({
+      eta = r.prop(theta$a.mu[t+1,], sigma = theta$a.cov[,,t+1])
+      mod = fit.inla(data = data ,eta = eta)
+      INLA_crash = F
+    },error=function(e){
+    },finally={})
+  }
   if (t==0){
     delta = N_0*d.prop(y = eta, x = theta$a.mu[1,], sigma = theta$a.cov[,,1], log = FALSE)
     weight = mod$mlik + prior(eta) - d.prop(y = eta, x = theta$a.mu[1,], sigma = theta$a.cov[,,1])
@@ -90,11 +88,11 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   t = 0
   res = list()
   res$data = data
-  amis.list = lapply(seq(N_0),function(x){
+  amis.list = mclapply(seq(N_0),function(x){
     par.amis(x, data, theta, t, N_0, 
              N_t, N_tmp, prior, d.prop,
              r.prop, fit.inla)
-  })#, mc.set.seed = TRUE, mc.cores = ncores)
+  }, mc.set.seed = TRUE, mc.cores = ncores)
   for (ele in amis.list){
     setTxtProgressBar(pb, i_tot)
     i_tot = i_tot + 1
@@ -110,11 +108,11 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   # adaptive importance sampling
   for (t in seq(length(N_t))){
     N_tmp = N_tmp + N_t[t]
-    amis.list = lapply(seq(N_t[t]),function(x){
+    amis.list = mclapply(seq(N_t[t]),function(x){
       par.amis(x, data, theta, t, N_0, 
                N_t, N_tmp, prior, d.prop,
                r.prop, fit.inla)
-    })#,mc.set.seed = TRUE, mc.cores = ncores)
+    },mc.set.seed = TRUE, mc.cores = ncores)
     for (ele in amis.list){
       setTxtProgressBar(pb, i_tot)
       i_tot = i_tot + 1
