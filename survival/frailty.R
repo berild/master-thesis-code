@@ -36,7 +36,7 @@ source("./survival/frailty_amis_w_inla.R")
 # 
 
 data(rats)
-n_class = unique(rats$litter)
+n_class = length(unique(rats$litter))
 init = list(mu = rep(1,n_class),cov = diag(n_class))
 amis_w_inla_mod = amis.w.inla(data = rats, init = init, prior.frailty, 
                               dq.frailty, rq.frailty, fit.inla.rats, 
