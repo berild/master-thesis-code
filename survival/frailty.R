@@ -30,7 +30,7 @@ init = list(mu = rep(1,n_class),cov = diag(n_class))
 
 amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.frailty, 
                               dq.frailty, rq.frailty, fit.inla, 
-                              N_t = seq(25,26,1), N_0 = 25, kde = T)
+                              N_t = seq(25,50,1)*10, N_0 = 250, kde = T)
 amis_w_inla_mod$params = list(intercept = 1, beta = beta)
 save(amis_w_inla_mod,file = "./sims/test3-frailty-amis-w-inla.Rdata")
 
