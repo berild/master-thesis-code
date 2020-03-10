@@ -11,8 +11,8 @@ source("./survival/frailty_amis_w_inla.R")
 variant  = 0
 n = 100
 n_class = 10
-
-u = rep(rgamma(n_class,shape = 1, rate = 1), each = n_class)
+frailty.param = 3
+u = rep(rgamma(n_class,shape = frailty.param, rate = frailty.param), each = n_class)
 
 alpha = 1.1
 beta = 2.2
@@ -31,8 +31,8 @@ init = list(mu = rep(1,n_class),cov = diag(n_class))
 amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.frailty, 
                               dq.frailty, rq.frailty, fit.inla, 
                               N_t = seq(25,50,1)*10, N_0 = 250, kde = T)
-amis_w_inla_mod$params = list(intercept = 1, beta = beta)
-save(amis_w_inla_mod,file = "./sims/test3-frailty-amis-w-inla.Rdata")
+amis_w_inla_mod$params = list(intercept = 1, beta = beta, alpha = frailty.param, params = u)
+save(amis_w_inla_mod,file = "./sims/test1-frailty-amis-w-inla.Rdata")
 
 
 # data(rats)

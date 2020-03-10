@@ -27,18 +27,15 @@ dq.param <- function(param, eta, mlik){
   for (j in seq(length(param))){
     for (i in seq(nrow(eta))){
       weight[j] = weight[j] + 
-        exp(sum(dgamma(eta[i,],rate = param[j],shape = param[j],log=TRUE)))*exp(mlik[i])
+        exp(sum(dgamma(eta[i,],rate = param[j],shape = param[j],log=TRUE)) + 
+              mlik[i] + prior.frailty(param[j]))
     }
-    weight[j] = weight[j]/nrow(eta) + prior.frailty(param[j],log = FALSE)
   }
   weight = weight/sum(weight)
   return(weight)
 }
 
 calc.param <- function(mlik,eta,weight){
-  browser()
-  tmp.weight = exp(weight - max(weight))
-  tmp.cov = sum(tmp.weight*(eta - rep(1,ncol(eta))))/sum(tmp.weight)
   frailty.seq = seq(0,5,length.out = 101)[-1]
   frailty.weight = dq.param(frailty.seq,eta,mlik)
   return(data.frame(x=frailty.seq,y = frailty.weight))
@@ -140,6 +137,31 @@ running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
   ess.df = data.frame(time = c(times[1],times[rev(seq(length(times),100,-step))]),
                       ess = c(ess[1],ess[rev(seq(length(ess),100,-step))]))
   return(ess.df)
+}
+
+kde.quantile <- function(kde){
+  n_kd = length(kde)
+  quants = data.frame(idx = seq(n_kd),q0.025 = numeric(n_kd),q0.5 = numeric(n_kd),q0.975 = numeric(n_kd))
+  for (i in seq(n_kd)){
+    tmp = 0
+    q25 = T
+    q5 = T
+    step.size = kde[[i]]$x[2]- kde[[i]]$x[1]
+    for (j in seq(nrow(kde[[i]]))){
+      tmp = tmp + kde[[i]]$y[j]*step.size
+      if ((tmp > 0.025)&(q25)){
+        quants$q0.025[i] = kde[[i]]$x[j]
+        q25 = F
+      }else if ((tmp > 0.5)&(q5)){
+        quants$q0.5[i] = kde[[i]]$x[j]
+        q5 = F
+      }else if ((tmp > 0.975)){
+        quants$q0.975[i] = kde[[i]]$x[j]
+        break
+      }
+    }
+  }
+  return(quants)
 }
 
 fit.marginals <- function(ws,margs,len = 400){
