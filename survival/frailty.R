@@ -8,7 +8,7 @@ library(survival)
 source("./survival/frailty_general_functions.R")
 source("./survival/frailty_amis_w_inla.R")
 
-# variant  = 0
+variant  = 0
 # n = 100
 # n_class = 10
 # frailty.param = 3
@@ -38,7 +38,7 @@ source("./survival/frailty_amis_w_inla.R")
 data(rats)
 n_class = length(unique(rats$litter))
 init = list(mu = rep(1,n_class),cov = diag(n_class))
-amis_w_inla_mod = amis.w.inla(data = rats, init = init, prior.frailty, 
-                              dq.frailty, rq.frailty, fit.inla.rats, 
+amis_w_inla_mod = amis.w.inla(data = rats, init = init, prior.frailty,
+                              dq.frailty, rq.frailty, fit.inla.rats,
                               N_t = seq(25,50,1)*10, N_0 = 250, kde = T)
 save(amis_w_inla_mod,file = "./sims/rats-frailty-amis-w-inla.Rdata")
