@@ -9,6 +9,18 @@ prior.frailty <- function(x, log = TRUE) {
   sum(dgamma(x,shape = 1,rate = 0.01,log = log))
 }
 
+fit.inla.rats <- function(data,eta){
+  data$oset = log(eta[data$litter])
+  formula = inla.surv(time/52,status) ~ 1 + factor(rx) + factor(sex) + offset(oset)
+  res=inla(formula,
+           family ="weibullsurv",
+           data=data,
+           control.family = list(list(variant = variant)))
+  return(list(mlik = res$mlik[[1]],
+              dists = list(intercept = arginals.fixed[[1]],
+                           rx = res$marginals.fixed[[2]],
+                           sex = res$marginals.fixed[[3]])))
+}
 
 fit.inla <- function(data,eta){
   data$oset = log(eta[data$idx])
