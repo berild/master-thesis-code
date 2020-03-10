@@ -6,50 +6,13 @@ require(mvtnorm)
 require(MASS)
 
 prior.frailty <- function(x, log = TRUE) {
-  sum(dgamma(x,shape = 1,rate = 1,log = log))
+  sum(dgamma(x,shape = 1,rate = 0.01,log = log))
 }
 
-dq.param <- function(y, eta, log =TRUE) {
-  sum(dgamma(y,rate = eta, shape = eta,log = log))
-}
-
-rq.param<- function(eta,n) {
-  as.vector(rgamma(n = n,rate=eta,shape = eta))
-}
 
 fit.inla <- function(data,eta){
-  margs = NA
-  weight = numeric(10)
-  formula = inla.surv(y,event) ~ 1 + x + offset(log(oset))
-  for (i in seq(10)){
-    INLA_crash = T
-    while(INLA_crash){
-      tryCatch({
-        param = rq.param(eta,n = length(unique(data$idx)))
-        data$oset = param[data$idx]
-        res=inla(formula,
-                 family ="weibullsurv",
-                 data=data,
-                 control.family = list(list(variant = variant)))
-        INLA_crash = F 
-      },error=function(e){
-      },finally={})
-    }
-    margs = store.post(list(intercept = res$marginals.fixed[[1]],
-                            beta = res$marginals.fixed[[2]]),
-                       margs,i,10)
-    weight[i] = res$mlik[[1]] + dq.param(data$oset,eta)
-  }
-  weight = exp(weight- max(weight))
-  margs = lapply(margs, function(x){fit.marginals(weight,x)})
-  return(list(mlik = log(sum(weight)),
-              dists = margs))
-}
-
-fit.inla.k <- function(data,eta){
-  param = rq.param(eta,n = length(unique(data$idx)))
-  data$oset = log(param[data$idx])
-  formula = inla.surv(y,event) ~ 1 + rx + offset(oset)
+  data$oset = log(eta[data$idx])
+  formula = inla.surv(y,event) ~ 1 + x + offset(oset)
   res=inla(formula,
            family ="weibullsurv",
            data=data,
@@ -59,11 +22,39 @@ fit.inla.k <- function(data,eta){
                            beta = res$marginals.fixed[[2]])))
 }
 
+dq.param <- function(param, eta, mlik){
+  weight = numeric(length(param))
+  for (j in seq(length(param))){
+    for (i in seq(nrow(eta))){
+      weight[j] = weight[j] + 
+        exp(sum(dgamma(eta[i,],rate = param[j],shape = param[j],log=TRUE)))*exp(mlik[i])
+    }
+    weight[j] = weight[j]/nrow(eta) + prior.frailty(param[j],log = FALSE)
+  }
+  weight = weight/sum(weight)
+  return(weight)
+}
+
+calc.param <- function(mlik,eta,weight){
+  browser()
+  tmp.weight = exp(weight - max(weight))
+  tmp.cov = sum(tmp.weight*(eta - rep(1,ncol(eta))))/sum(tmp.weight)
+  frailty.seq = seq(0,5,length.out = 101)[-1]
+  frailty.weight = dq.param(frailty.seq,eta,mlik)
+  return(data.frame(x=frailty.seq,y = frailty.weight))
+}
 
 calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   weight[1:i_tot] = exp(weight[1:i_tot] - max(weight[1:i_tot]))
-  theta$a.mu[i_cur] = sum(eta[1:i_tot]*(weight[1:i_tot]/sum(weight[1:i_tot])))
-    theta$a.cov[i_cur] = sum((eta[1:i_tot]-theta$a.mu[i_cur])^2*(weight[1:i_tot]/(sum(weight[1:i_tot]))))
+  for (i in seq(ncol(eta))){
+    theta$a.mu[i_cur,i] = sum(eta[1:i_tot,i]*weight[1:i_tot])/sum(weight[1:i_tot])
+  }
+  for (i in seq(ncol(eta))){
+    for (j in seq(i,ncol(eta))){
+      theta$a.cov[i,j,i_cur] = theta$a.cov[j,i,i_cur] = sum(weight[1:i_tot]*(eta[1:i_tot,i]-theta$a.mu[i_cur,i])*
+                                                              (eta[1:i_tot,j]-theta$a.mu[i_cur,j]))/(sum(weight[1:i_tot]))
+    }
+  }
   return(theta)
 }
 
@@ -127,39 +118,6 @@ amis_kde <- function(eta,weight){
   }
 }
 
-pqr_truth_lines <- function(data,params,type){
-  quants = c(0.1,0.25,0.5,0.75,0.9)
-  mu = params[[1]] + params[[2]]*data$x
-  tau = exp(params[[3]] + params[[4]]*data$x)
-  res = data.frame(x = NA, y = NA, quants = NA)
-  for (i in seq(length(quants))){
-    if (type == "gaussian"){
-      tmpy = qnorm(quants[i],mean = mu,sd = 1/sqrt(tau))
-    }else if (type == "gamma"){
-      tmpy = exp(mu)*qgamma(quants[i], shape = tau, scale = 1)/tau 
-    }
-    res = rbind(res,data.frame(x = data$x, y = tmpy, quants = rep(toString(quants[i]),length(data$x))))
-  }
-  return(res[-1,])
-}
-
-pqr_inla <- function(data,margs,eta_kern,type){
-  quants = c(0.1,0.25,0.5,0.75,0.9)
-  params = c(sapply(margs, function(x){x$x[which.max(x$y)]}),
-             sapply(eta_kern, function(x){x$x[which.max(x$y)]}))
-  mu = params[1] + params[2]*data$x
-  tau = exp(params[3] + params[4]*data$x)
-  res = data.frame(x = NA, y = NA, quants = NA)
-  for (i in seq(length(quants))){
-    if (type == "gaussian"){
-      tmpy = qnorm(quants[i],mean = mu,sd = 1/sqrt(tau))
-    }else if (type == "gamma"){
-      tmpy = exp(mu)*qgamma(quants[i], shape = tau, scale = 1)/tau 
-    }
-    res = rbind(res,data.frame(x = data$x, y = tmpy, quants = rep(toString(quants[i]),length(data$x))))
-  }
-  return(res[-1,])
-}
 
 running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
   if (anyNA(ws)){
