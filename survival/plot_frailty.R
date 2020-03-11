@@ -64,7 +64,7 @@ ggplot() +
 
 ggplot() + 
   geom_line(data = amis_w_inla_mod$frailty,aes(x=x,y=y,color = "AMIS w/ INLA")) + 
-  #geom_line(data = as.data.frame(res_inla$marginals.hyperpar$`Precision for idx`[-c(74,75),]),aes(x=x,y=y,color = "INLA")) + 
+  geom_line(data = as.data.frame(res_inla$marginals.hyperpar$`Precision for idx`[-c(74,75),]),aes(x=x,y=y,color = "INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$params$frailty,color = "firebrick") + 
   labs(title= "Rate/Shape of frailty") + 
   labs(color = "")+

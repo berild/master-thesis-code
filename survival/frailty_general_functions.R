@@ -45,7 +45,7 @@ dq.param <- function(param, eta, mlik){
               mlik[i] + prior.frailty(param[j]))
     }
   }
-  weight = weight/sum(weight)
+  weight = weight/(sum(weight)*(param[2]-param[1]))
   return(weight)
 }
 
