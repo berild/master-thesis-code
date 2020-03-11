@@ -9,29 +9,31 @@ prior.frailty <- function(x, log = TRUE) {
   sum(dgamma(x,shape = 1,rate = 0.01,log = log))
 }
 
-fit.inla.rats <- function(data,eta){
-  data$oset = log(eta[data$litter])
-  formula = inla.surv(time/52,status) ~ 1 + factor(rx) + factor(sex) + offset(oset)
+fit.inla.kidney <- function(data,eta){
+  data$oset = log(eta[data$id])
+  formula = inla.surv(time,status) ~ age + sex + disease + offset(oset)
   res=inla(formula,
            family ="weibullsurv",
            data=data,
            control.family = list(list(variant = variant)))
   return(list(mlik = res$mlik[[1]],
               dists = list(intercept = arginals.fixed[[1]],
-                           rx = res$marginals.fixed[[2]],
-                           sex = res$marginals.fixed[[3]])))
+                           age = res$marginals.fixed[[2]],
+                           sex = res$marginals.fixed[[3]],
+                           disease = res$marginals.fixed[[4]])))
 }
 
 fit.inla <- function(data,eta){
   data$oset = log(eta[data$idx])
-  formula = inla.surv(y,event) ~ 1 + x + offset(oset)
+  formula = inla.surv(y,event) ~ x + offset(oset)
   res=inla(formula,
            family ="weibullsurv",
            data=data,
            control.family = list(list(variant = variant)))
   return(list(mlik = res$mlik[[1]],
               dists = list(intercept = res$marginals.fixed[[1]],
-                           beta = res$marginals.fixed[[2]])))
+                           beta = res$marginals.fixed[[2]],
+                           alpha = res$marginals.hyperpar[[1]])))
 }
 
 dq.param <- function(param, eta, mlik){

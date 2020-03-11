@@ -5,18 +5,22 @@ require(parallel)
 require(mvtnorm)
 
 dq.frailty <- function(y, x, sigma = init$cov, log =TRUE) {
-  # rate = x/sigma
-  # shape = x^2/sigma
-  # sum(dgamma(y,rate = rate, shape = shape,log = log))
-  dmvt(y, sigma = as.matrix(sigma), df=3, delta = x, type = "shifted",log=log)
-  # dmvnorm(y, mean = x, sigma = sigma, log = log)
+  rate = x/diag(sigma)
+  shape = x^2/diag(sigma)
+  if (log){
+    sum(dgamma(y, rate = rate, shape = shape, log = log)) 
+  }else{
+    prod(dgamma(y, rate = rate, shape = shape, log = log))
+  }
+  #dmvt(y, sigma = sigma, df=3, delta = x, type = "shifted",log=log)
+  #dmvnorm(y, mean = x, sigma = sigma, log = log)
 }
 
 rq.frailty <- function(x, sigma = init$cov) {
-  # rate = x/sigma
-  # shape = x^2/sigma
-  # rgamma(n = length(x),rate=rate,shape = shape)
-  as.vector(rmvt(1,sigma = as.matrix(sigma), df=3, delta = x, type = "shifted"))
+  rate = x/diag(sigma)
+  shape = x^2/diag(sigma)
+  rgamma(n = length(x),rate=rate,shape = shape)
+  #as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
   #as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
 
@@ -67,7 +71,7 @@ par.amis <- function(x,data, theta, t, N_0, N_t, N_tmp,
 }
 
 
-amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(20,20), N_0 = NA, pqr = NA, kde = NA){
+amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(20,20), N_0 = NA, pqr = NA, kde = NA, frailty=NA){
   if (anyNA(N_0)){
     N_0 = round(sum(N_t)/2) 
   }
@@ -142,8 +146,12 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   #res$frailty = calc.param()
   res$weight = exp(weight - max(weight))
   res$margs = lapply(margs, function(x){fit.marginals(res$weight,x)})
-  if ((!anyNA(kde))|(!anyNA(pqr))){
+  if ((!anyNA(kde))|(!anyNA(pqr))|(!anyNA(frailty))){
     res$eta_kern = amis_kde(res$eta,res$weight) 
+  }
+  if ((!anyNA(frailty))){
+    res$frailty = calc.param(res$mlik,res$eta,res$weight)
+    res$frailty_idx = kde.quantile(res$eta_kern)
   }
   if (!anyNA(pqr)){
     res$pqr = pqr_inla(data,res$margs,res$eta_kern,type = pqr) 
