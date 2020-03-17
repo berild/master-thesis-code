@@ -5,22 +5,22 @@ require(parallel)
 require(mvtnorm)
 
 dq.frailty <- function(y, x, sigma = init$cov, log =TRUE) {
-  rate = x/diag(sigma)
-  shape = x^2/diag(sigma)
-  if (log){
-    sum(dgamma(y, rate = rate, shape = shape, log = log)) 
-  }else{
-    prod(dgamma(y, rate = rate, shape = shape, log = log))
-  }
-  #dmvt(y, sigma = sigma, df=3, delta = x, type = "shifted",log=log)
+  # rate = x/diag(sigma)
+  # shape = x^2/diag(sigma)
+  # if (log){
+  #   sum(dgamma(y, rate = rate, shape = shape, log = log)) 
+  # }else{
+  #   prod(dgamma(y, rate = rate, shape = shape, log = log))
+  # }
+  dmvt(y, sigma = sigma, df=3, delta = x, type = "shifted",log=log)
   #dmvnorm(y, mean = x, sigma = sigma, log = log)
 }
 
 rq.frailty <- function(x, sigma = init$cov) {
-  rate = x/diag(sigma)
-  shape = x^2/diag(sigma)
-  rgamma(n = length(x),rate=rate,shape = shape)
-  #as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
+  # rate = x/diag(sigma)
+  # shape = x^2/diag(sigma)
+  # rgamma(n = length(x),rate=rate,shape = shape)
+  as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
   #as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
 

@@ -13,7 +13,7 @@ formula = inla.surv(y,event)~ x + f(idx, model = "iid")
 res_inla =inla(formula,
        family ="weibullsurv",
        data=amis_w_inla_mod$data,
-       control.family = list(list(variant = variant)))
+       control.family = list(list(variant = 0)))
 
 
 ggplot() + 

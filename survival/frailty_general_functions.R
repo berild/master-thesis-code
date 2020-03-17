@@ -24,7 +24,8 @@ fit.inla.kidney <- function(data,eta){
 }
 
 fit.inla <- function(data,eta){
-  data$oset = log(eta[data$idx])
+  # data$oset = log(eta[data$idx])
+  data$oset = eta[data$idx]
   formula = inla.surv(y,event) ~ x + offset(oset)
   res=inla(formula,
            family ="weibullsurv",

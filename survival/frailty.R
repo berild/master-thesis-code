@@ -16,7 +16,7 @@ alpha = 1.1
 beta = 2.2
 
 # frailty = 1
-frailty.param = 2
+frailty.param = 1
 u = rep(rgamma(n_class,shape = frailty.param, rate = frailty.param), each = n/n_class)
 
 x = c(scale(runif(n)))
@@ -29,7 +29,8 @@ y = rweibull(n,
 event = rep(1,n)
 data = list(y=y, event=event, x=x, idx = rep(1:n_class,each = n/n_class))
 
-init = list(mu = rep(1,n_class),cov = 1*diag(n_class))
+# init = list(mu = rep(1,n_class),cov = 1*diag(n_class))
+init = list(mu = rep(0,n_class),cov = 1*diag(n_class))
 
 amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.frailty,
                               dq.frailty, rq.frailty, fit.inla,
