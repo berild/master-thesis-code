@@ -76,9 +76,9 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     N_0 = round(sum(N_t)/2) 
   }
   if (detectCores()>10){
-    ncores = 8
+    ncores = 10
   }else{
-    ncores = detectCores()
+    ncores = 10
   }
   N_tot = N_0 + sum(N_t)
   mlik = numeric(N_tot)
