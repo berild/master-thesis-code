@@ -38,7 +38,7 @@ res_inla =inla(formula,
 
 # init = list(mu = rep(1,n_class),cov = 1*diag(n_class))
 init = list(mu = res_inla$summary.random$idx[,2],
-            cov = 1*diag(n_class))
+            cov = diag(res_inla$summary.random$idx[,3]^2))
 
 amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.effect,
                               dq.frailty, rq.frailty, fit.inla,
