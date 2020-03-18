@@ -42,7 +42,7 @@ init = list(mu = res_inla$summary.random$idx[,2],
 
 amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.effect,
                               dq.frailty, rq.frailty, fit.inla,
-                              N_t = seq(25,40,1)*10, N_0 = 250,frailty=T)
+                              N_t = seq(25,40,1), N_0 = 25,frailty=T)
 amis_w_inla_mod$params = list(intercept = 1, beta = beta, alpha = alpha, frailty = frailty.param, params = unique(u))
 save(amis_w_inla_mod,file = "./sims/test2-frailty-amis-w-inla.Rdata")
 

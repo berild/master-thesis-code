@@ -49,5 +49,5 @@ plot_gamma <- function(shape, rate, n){
   return(ggplot() + 
            geom_line(data = data.frame(x = seq(0,4,length.out = n),y = dgamma(seq(0,4,length.out = n),rate =rate, shape = shape)), aes(x = x, y = y)))
 }
-plot_gamma(shape = 1/2, rate = 1/2, n =200)
+plot_gamma(shape = 1, rate = 1, n =200)
 

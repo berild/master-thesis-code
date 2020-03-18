@@ -5,12 +5,32 @@ require(spdep)
 require(mvtnorm)
 require(MASS)
 
+# prior.effect <- function(x, log = TRUE) {
+#   if (log){
+#     sum(dgamma(exp(x),shape = 1,rate = 0.01,log = log)) 
+#   }else{
+#     prod(dgamma(exp(x),shape = 1,rate = 0.01,log = log))
+#   }
+# }
+
 prior.effect <- function(x, log = TRUE) {
-  sum(dgamma(exp(x),shape = 1,rate = 0.01,log = log))
+  frailty.seq = seq(0,5,length.out = 51)[-1]
+  prior.frailty.seq = prior.frailty(frailty.seq)
+  cond.frailty.seq = numeric(length(frailty.seq))
+  for (i in seq(length(frailty.seq))){
+    cond.frailty.seq[i] = sum(dgamma(exp(x),shape = frailty.seq[i],rate = frailty.seq[i],log=T)) + 
+      prior.frailty.seq[i]
+  }
+  step = seq[2]-seq[1]
+  if (log){
+    return(log(step*sum(exp(cond.frailty.seq))))
+  }else{
+    return(step*sum(exp(cond.frailty.seq)))
+  }
 }
 
 prior.frailty <- function(x, log = TRUE) {
-  sum(dgamma(x,shape = 1,rate = 0.01,log = log))
+  dgamma(x,shape = 1,rate = 0.01,log = log)
 }
 
 fit.inla.kidney <- function(data,eta){
