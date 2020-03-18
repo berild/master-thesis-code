@@ -33,7 +33,7 @@ data = list(y=y, event=event, x=x, idx = rep(1:n_class,each = n/n_class))
 formula = inla.surv(y,event)~ x + f(idx, model = "iid")
 res_inla =inla(formula,
                family ="weibullsurv",
-               data=amis_w_inla_mod$data,
+               data=data,
                control.family = list(list(variant = variant)))
 
 # init = list(mu = rep(1,n_class),cov = 1*diag(n_class))
