@@ -18,7 +18,7 @@ prior.effect <- function(x, log = TRUE) {
   prior.frailty.seq = prior.frailty(frailty.seq)
   cond.frailty.seq = numeric(length(frailty.seq))
   for (i in seq(length(frailty.seq))){
-    cond.frailty.seq[i] = sum(dgamma(exp(x),shape = frailty.seq[i],rate = frailty.seq[i],log=T)) + 
+    cond.frailty.seq[i] = sum(dgamma(x,shape = frailty.seq[i],rate = frailty.seq[i],log=T)) + 
       prior.frailty.seq[i]
   }
   step = frailty.seq[2]-frailty.seq[1]
@@ -49,7 +49,7 @@ fit.inla.kidney <- function(data,eta){
 
 fit.inla <- function(data,eta){
   # data$oset = log(eta[data$idx])
-  data$oset = eta[data$idx]
+  data$oset = log(eta[data$idx])
   formula = inla.surv(y,event) ~ x + offset(oset)
   res=inla(formula,
            family ="weibullsurv",
@@ -66,7 +66,7 @@ dq.param <- function(param, eta, mlik){
   for (j in seq(length(param))){
     for (i in seq(nrow(eta))){
       weight[j] = weight[j] + 
-        exp(sum(dgamma(exp(eta[i,]),rate = param[j],shape = param[j],log=TRUE)) + 
+        exp(sum(dgamma(eta[i,],rate = param[j],shape = param[j],log=TRUE)) + 
               mlik[i] + prior.frailty(param[j]))
     }
   }
@@ -75,7 +75,7 @@ dq.param <- function(param, eta, mlik){
 }
 
 calc.param <- function(mlik,eta,weight){
-  frailty.seq = seq(0,5,length.out = 101)[-1]
+  frailty.seq = seq(0,max.frail,length.out = 101)[-1]
   frailty.weight = dq.param(frailty.seq,eta,mlik)
   return(data.frame(x=frailty.seq,y = frailty.weight))
 }
