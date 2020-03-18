@@ -5,6 +5,10 @@ require(spdep)
 require(mvtnorm)
 require(MASS)
 
+prior.effect <- function(x, log = TRUE) {
+  sum(dgamma(exp(x),shape = 1,rate = 0.01,log = log))
+}
+
 prior.frailty <- function(x, log = TRUE) {
   sum(dgamma(x,shape = 1,rate = 0.01,log = log))
 }
@@ -42,7 +46,7 @@ dq.param <- function(param, eta, mlik){
   for (j in seq(length(param))){
     for (i in seq(nrow(eta))){
       weight[j] = weight[j] + 
-        exp(sum(dgamma(eta[i,],rate = param[j],shape = param[j],log=TRUE)) + 
+        exp(sum(dgamma(exp(eta[i,]),rate = param[j],shape = param[j],log=TRUE)) + 
               mlik[i] + prior.frailty(param[j]))
     }
   }

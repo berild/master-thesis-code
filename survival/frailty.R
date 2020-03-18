@@ -32,7 +32,7 @@ data = list(y=y, event=event, x=x, idx = rep(1:n_class,each = n/n_class))
 # init = list(mu = rep(1,n_class),cov = 1*diag(n_class))
 init = list(mu = rep(0,n_class),cov = 1*diag(n_class))
 
-amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.frailty,
+amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.effect,
                               dq.frailty, rq.frailty, fit.inla,
                               N_t = seq(25,50,1)*10, N_0 = 250,frailty=T)
 amis_w_inla_mod$params = list(intercept = 1, beta = beta, alpha = alpha, frailty = frailty.param, params = unique(u))

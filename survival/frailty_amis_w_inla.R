@@ -12,16 +12,16 @@ dq.frailty <- function(y, x, sigma = init$cov, log =TRUE) {
   # }else{
   #   prod(dgamma(y, rate = rate, shape = shape, log = log))
   # }
-  #dmvt(y, sigma = sigma, df=3, delta = x, type = "shifted",log=log)
-  dmvnorm(y, mean = x, sigma = sigma, log = log)
+  dmvt(y, sigma = sigma, df=3, delta = x, type = "shifted",log=log)
+  #dmvnorm(y, mean = x, sigma = sigma, log = log)
 }
 
 rq.frailty <- function(x, sigma = init$cov) {
   # rate = x/diag(sigma)
   # shape = x^2/diag(sigma)
   # rgamma(n = length(x),rate=rate,shape = shape)
-  #as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
-  as.vector(rmvnorm(1, mean = x, sigma = sigma))
+  as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
+  #as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
 
 calc.delta <- function(N_t,eta,theta,t,d.prop){
@@ -116,8 +116,6 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     
   }
   theta = calc.theta(theta,weight,eta,i_tot,2)
-  print(theta$a.mu[2,])
-  print(diag(theta$a.cov[,,2]))
   # adaptive importance sampling
   for (t in seq(length(N_t))){
     N_tmp = N_tmp + N_t[t]
@@ -140,8 +138,6 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     delta[1:(N_tmp - N_t[t])] = delta.weight$delta
     weight[1:(N_tmp - N_t[t])] = delta.weight$weight
     theta = calc.theta(theta,weight,eta,i_tot,t+2)
-    print(theta$a.mu[t+2,])
-    print(diag(theta$a.cov[,,t+2]))
   }
   res$mlik = mlik
   res$eta = eta
