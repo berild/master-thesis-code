@@ -29,8 +29,16 @@ y = rweibull(n,
 event = rep(1,n)
 data = list(y=y, event=event, x=x, idx = rep(1:n_class,each = n/n_class))
 
+
+formula = inla.surv(y,event)~ x + f(idx, model = "iid")
+res_inla =inla(formula,
+               family ="weibullsurv",
+               data=amis_w_inla_mod$data,
+               control.family = list(list(variant = variant)))
+
 # init = list(mu = rep(1,n_class),cov = 1*diag(n_class))
-init = list(mu = rep(0,n_class),cov = 1*diag(n_class))
+init = list(mu = res_inla$summary.random$idx[,2],
+            cov = 1*diag(n_class))
 
 amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.effect,
                               dq.frailty, rq.frailty, fit.inla,

@@ -24,6 +24,7 @@ ggplot() +
   labs(color = "")+
   theme_bw()
 
+
 ggplot() + 
   geom_line(data = amis_w_inla_mod$margs$beta, aes(x=x,y=y,color = "AMIS w/ INLA")) +
   geom_line(data = as.data.frame(res_inla$marginals.fixed[[2]]),aes(x=x,y=y,color = "INLA")) + 
