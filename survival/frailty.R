@@ -16,7 +16,7 @@ alpha = 1.1
 beta = 2.2
 
 # frailty = 1
-frailty.param = 3
+frailty.param = 1
 u = rep(rgamma(n_class,shape = frailty.param, rate = frailty.param), each = n/n_class)
 
 x = c(scale(runif(n)))

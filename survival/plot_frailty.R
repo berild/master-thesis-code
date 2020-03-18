@@ -69,6 +69,6 @@ ggplot() +
   geom_vline(xintercept = amis_w_inla_mod$params$frailty,color = "firebrick") + 
   labs(title= "Rate/Shape of frailty") + 
   labs(color = "")+
-  #coord_cartesian(xlim=c(0,20)) + 
+  coord_cartesian(xlim=c(0,20)) + 
   theme_bw()
 
