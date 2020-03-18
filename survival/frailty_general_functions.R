@@ -14,7 +14,7 @@ require(MASS)
 # }
 
 prior.effect <- function(x, log = TRUE) {
-  frailty.seq = seq(0,5,length.out = 51)[-1]
+  frailty.seq = seq(0,max.frail,length.out = 51)[-1]
   prior.frailty.seq = prior.frailty(frailty.seq)
   cond.frailty.seq = numeric(length(frailty.seq))
   for (i in seq(length(frailty.seq))){

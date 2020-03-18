@@ -16,7 +16,7 @@ alpha = 1.1
 beta = 2.2
 
 # frailty = 1
-frailty.param = 2
+frailty.param = 3
 u = rep(rgamma(n_class,shape = frailty.param, rate = frailty.param), each = n/n_class)
 
 x = c(scale(runif(n)))
@@ -37,12 +37,13 @@ res_inla =inla(formula,
                control.family = list(list(variant = variant)))
 
 # init = list(mu = rep(1,n_class),cov = 1*diag(n_class))
+max.frail = max(res_inla$marginals.hyperpar$`Precision for idx`[res_inla$marginals.hyperpar$`Precision for idx`[,2]>5e-4,1])
 init = list(mu = res_inla$summary.random$idx[,2],
             cov = diag(res_inla$summary.random$idx[,3]^2))
 
 amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.effect,
                               dq.frailty, rq.frailty, fit.inla,
-                              N_t = seq(25,40,1)*10, N_0 = 250,frailty=T)
+                              N_t = seq(25,50,1)*10, N_0 = 250,frailty=T)
 amis_w_inla_mod$params = list(intercept = 1, beta = beta, alpha = alpha, frailty = frailty.param, params = unique(u))
 save(amis_w_inla_mod,file = "./sims/test3-frailty-amis-w-inla.Rdata")
 
