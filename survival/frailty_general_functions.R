@@ -21,7 +21,7 @@ prior.effect <- function(x, log = TRUE) {
     cond.frailty.seq[i] = sum(dgamma(exp(x),shape = frailty.seq[i],rate = frailty.seq[i],log=T)) + 
       prior.frailty.seq[i]
   }
-  step = seq[2]-seq[1]
+  step = frailty.seq[2]-frailty.seq[1]
   if (log){
     return(log(step*sum(exp(cond.frailty.seq))))
   }else{
