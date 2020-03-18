@@ -48,7 +48,7 @@ inla_frailty_idx = as.data.frame(res_inla$summary.random$idx[,4:6])
 names(inla_frailty_idx) = names(amis_w_inla_mod$frailty_idx[,2:4])
 inla_frailty_idx = data.frame(inla_frailty_idx,idx = amis_w_inla_mod$frailty_idx$idx)
 
-amis_w_inla_mod$frailty_idx = data.frame(amis_w_inla_mod$frailty_idx, rv = amis_w_inla_mod$params$params)
+amis_w_inla_mod$frailty_idx = data.frame(amis_w_inla_mod$frailty_idx, rv = log(amis_w_inla_mod$params$params))
 
 ggplot() + 
   geom_ribbon(data = inla_frailty_idx,aes(x =idx,ymin = q0.025, ymax=q0.975),fill = gg_color_hue(3)[2],color = gg_color_hue(3)[2] ,alpha = 0.3,show.legend = FALSE)  + 
