@@ -1,20 +1,37 @@
 library(ggplot2)
+library(INLA)
+load("./PQR/pqr-models.Rdata")
 
 ggplot() + 
-  geom_line(data = as.data.frame(amis_w_inla_mod$margs$a), aes(x=x,y=y)) +
-  geom_vline(xintercept = mod$params[[1]])
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$a), aes(x=x,y=y))
 
 ggplot() + 
-  geom_line(data = as.data.frame(amis_w_inla_mod$margs$b), aes(x=x,y=y)) + 
-  geom_vline(xintercept = mod$params[[2]])
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$b), aes(x=x,y=y))
 
 ggplot() + 
-  geom_line(data = amis_w_inla_mod$eta_kern[[1]],aes(x=x,y=y)) + 
-  geom_vline(xintercept = mod$params[[3]])
+  geom_line(data = amis_w_inla_mod$eta_kern[[1]],aes(x=x,y=y))
 
 ggplot() + 
-  geom_line(data = amis_w_inla_mod$eta_kern[[2]],aes(x=x,y=y)) + 
-  geom_vline(xintercept = mod$params[[4]])
+  geom_line(data = amis_w_inla_mod$eta_kern[[2]],aes(x=x,y=y)) 
+
+ggplot() +
+  geom_line(data = amis_w_inla_mod$pqr,aes(x=x,y=y,color = quants)) + 
+  geom_point(data= as.data.frame(amis_w_inla_mod$data),aes(x=x,y=y))+
+  labs(y="Immunoglobulin G(g/L)",x="Age",color = "Quantiles") + 
+  theme_bw() 
+
+#DXX[DXX$mod=="D54",][-1],type ="gamma")
+tmp = DXX[DXX$mod=="D54",][-1]
+ggplot() +
+  geom_line(data = amis_w_inla_mod$pqr,aes(x=x,y=y,color = quants, linetype = "AMIS w/ INLA")) + 
+  geom_line(data= amis_w_inla_mod$pqr_truth,aes(x=x,y=y,color = quants,linetype = "Truth"))+
+  geom_point(data=as.data.frame(amis_w_inla_mod$data),aes(x=x,y=y),alpha = 0.4) + 
+  labs(y="y",x="x",color = "Quantiles", linetype="") + 
+  annotate("text",label=paste("a =", tmp[1],"   b =", tmp[2],"   c =",tmp[3],"  d =",tmp[4]),
+           x = 0.5, y = 0.4) + 
+  coord_cartesian(ylim = c(-9,0.45)) + 
+  theme_bw() 
+
 
 params = amis_w_inla_mod$theta$a.mu[nrow(amis_w_inla_mod$theta$a.mu),]
 res = inla(formula,

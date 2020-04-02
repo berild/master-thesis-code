@@ -38,7 +38,7 @@ amis_w_inla_mod <- amis.w.inla(data = turnout, init = init, prior.rho.lambda,
                                dq.rho.lambda, rq.rho.lambda, fit.inla, 
                                N_t = seq(25,50,1), N_0 = 25)
 save(amis_w_inla_mod, file = "./sims/sem-amis-w-inla.Rdata")
-amis_w_inla_mod$weight = exp(amis_w_inla_mod$weight)
+amis_w_inla_mod$weight = exp(amis_w_inla_mod$weight-max(amis_w_inla_mod$weight))
 eta_kern = kde2d.weighted(x = amis_w_inla_mod$eta[,1], y = amis_w_inla_mod$eta[,2], w = amis_w_inla_mod$weight/(sum(amis_w_inla_mod$weight)), n = 100, lims = c(-1,1,-1,1))
 eta_kern = data.frame(expand.grid(x=eta_kern$x, y=eta_kern$y), z=as.vector(eta_kern$z))
 
@@ -66,5 +66,6 @@ p3
 #save(mcmc_w_inla_mod, file = "./sem/sims/sem-mcmc-w-inla.Rdata")
 
 
-spplot(turnout["TURNOUT01"], colorkey = list(space = "bottom"))
-spplot(turnout["GDPCAP"], colorkey = list(space = "bottom"))
+spplot(turnout["TURNOUT01"],  col.regions= hcl.colors(16,palette =  hcl.pals("sequential")[21], alpha = 1, rev = TRUE),colorkey = list(space = "bottom"))
+
+spplot(turnout["GDPCAP"], col.regions= hcl.colors(16,palette =  hcl.pals("sequential")[21], alpha = 1, rev = TRUE),colorkey = list(space = "bottom"))

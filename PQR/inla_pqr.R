@@ -110,7 +110,7 @@ init = list(mu = c(0,0),cov = 0.005*diag(2))
 # 
 # 
 # # ImmunogG data
-# data("ImmunogG")
+data("ImmunogG")
 # amis_w_inla_mod = amis.w.inla(data = list(x=ImmunogG$Age,y = ImmunogG$IgG), 
 #                               init = init, prior.param, 
 #                               dq.param, rq.param, fit.inla.ggamma, 

@@ -21,7 +21,8 @@ ggplot() +
   geom_line(data = as.data.frame(res_inla$marginals.fixed[[1]]),aes(x=x,y=y,color = "INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$params$intercept,color = "firebrick")+ 
   labs(title = "Intercept") +
-  labs(color = "")+
+  labs(color = "",x="",y="")+
+  coord_cartesian(xlim=c(-1,2)) + 
   theme_bw()
 
 
@@ -30,7 +31,8 @@ ggplot() +
   geom_line(data = as.data.frame(res_inla$marginals.fixed[[2]]),aes(x=x,y=y,color = "INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$params$beta,color = "firebrick")+
   labs(title= "Beta") + 
-  labs(color = "")+
+  labs(color = "",x="",y="")+
+  coord_cartesian(xlim=c(1.5,3.3)) + 
   theme_bw()
 
 ggplot() + 
@@ -38,7 +40,8 @@ ggplot() +
   geom_line(data = as.data.frame(res_inla$marginals.hyperpar[[1]]),aes(x=x,y=y,color = "INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$params$alpha,color = "firebrick")+
   labs(title= "Alpha") + 
-  labs(color = "")+
+  labs(color = "",x="",y="")+
+  coord_cartesian(xlim=c(0.75,1.5)) + 
   theme_bw()
 
 
@@ -69,6 +72,6 @@ ggplot() +
   geom_vline(xintercept = amis_w_inla_mod$params$frailty,color = "firebrick") + 
   labs(title= "Rate/Shape of frailty") + 
   labs(color = "")+
-  coord_cartesian(xlim=c(0,20)) + 
+  coord_cartesian(xlim=c(0,10)) + 
   theme_bw()
 
