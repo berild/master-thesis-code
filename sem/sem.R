@@ -33,16 +33,16 @@ init = list(mu = c(0,0),cov = diag(2))
 
 source("./sem/general_functions.R")
 
-source("./sem/amis_w_inla.R")
-amis_w_inla_mod <- amis.w.inla(data = turnout, init = init, prior.rho.lambda, 
-                               dq.rho.lambda, rq.rho.lambda, fit.inla, 
-                               N_t = seq(25,50,1), N_0 = 25)
-save(amis_w_inla_mod, file = "./sims/sem-amis-w-inla.Rdata")
-eta_kern_amis = kde2d.weighted(x = amis_w_inla_mod$eta[,1], y = amis_w_inla_mod$eta[,2], w = amis_w_inla_mod$weight/(sum(amis_w_inla_mod$weight)), n = 100, lims = c(-1,1,-1,1))
-amis_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_amis$x, y=eta_kern_amis$y), z=as.vector(eta_kern_amis$z))
-save(amis_w_inla_mod, file = "./sims/sem-amis-w-inla.Rdata")
+# source("./sem/amis_w_inla.R")
+# amis_w_inla_mod <- amis.w.inla(data = turnout, init = init, prior.rho.lambda, 
+#                                dq.rho.lambda, rq.rho.lambda, fit.inla, 
+#                                N_t = seq(25,50,1), N_0 = 25)
+# save(amis_w_inla_mod, file = "./sims/sem-amis-w-inla.Rdata")
+# eta_kern_amis = kde2d.weighted(x = amis_w_inla_mod$eta[,1], y = amis_w_inla_mod$eta[,2], w = amis_w_inla_mod$weight/(sum(amis_w_inla_mod$weight)), n = 100, lims = c(-1,1,-1,1))
+# amis_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_amis$x, y=eta_kern_amis$y), z=as.vector(eta_kern_amis$z))
+# save(amis_w_inla_mod, file = "./sims/sem-amis-w-inla.Rdata")
 
-source("./sem/sem_is_w_inla.R")
+source("./sem/is_w_inla.R")
 is_w_inla_mod <- is.w.inla(data = turnout, init = init, prior.rho.lambda,
                            dq.rho.lambda, rq.rho.lambda,fit.inla, N_0 = 800, N = 10000)
 save(is_w_inla_mod, file = "./sims/sem-is-w-inla.Rdata")
