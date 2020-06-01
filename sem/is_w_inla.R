@@ -31,7 +31,7 @@ par.is <- function(x, data, theta, t, prior, d.prop, r.prop, fit.inla){
 
 is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = 200, N = 400){
   if (detectCores()>10){
-    ncores = 10
+    ncores = 20
   }else{
     ncores = detectCores()
   }
@@ -54,7 +54,7 @@ is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = 200, N 
   }
   theta = calc.theta(theta,weight,eta,N_0,2)
   margs = NA
-  eta = matrix(NA, ncol = length(init$mu), nrow = N_0)
+  eta = matrix(NA, ncol = length(init$mu), nrow = N)
   weight = numeric(N)
   mlik = numeric(N)
   is.list = mclapply(seq(N), function(x){
