@@ -5,13 +5,13 @@ require(parallel)
 require(mvtnorm)
 
 dq.rho.lambda <- function(y, x, sigma = init$cov, log =TRUE) {
-  dmvt(y,sigma = sigma, df=3, delta = x, type = "shifted",log=log)
-  #dmvnorm(y, mean = x, sigma = sigma, log = log)
+  #dmvt(y,sigma = sigma, df=3, delta = x, type = "shifted",log=log)
+  dmvnorm(y, mean = x, sigma = sigma, log = log)
 }
 
 rq.rho.lambda <- function(x, sigma = init$cov) {
-  as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
-  #as.vector(rmvnorm(1, mean = x, sigma = sigma))
+  #as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
+  as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
 
 
@@ -31,8 +31,15 @@ mcmc.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla,
   margs = NA
   for (i in seq(2,n.samples)){
     setTxtProgressBar(pb, i)
-    eta.new = r.prop(eta[i-1,],sigma = init$cov)
-    mod.new = fit.inla(data,eta.new)
+    INLA_crash = T
+    while(INLA_crash){
+      tryCatch({
+        eta.new = r.prop(eta[i-1,],sigma = init$cov)
+        mod.new = fit.inla(data,eta.new)
+        INLA_crash = F 
+      },error=function(e){
+      },finally={})
+    }
     lacc1 = mod.new$mlik + prior(eta.new) + d.prop(eta.new, eta[i-1,],init$cov)
     lacc2 = mod.curr$mlik + prior(eta[i-1,]) + d.prop(eta[i-1,], eta.new,init$cov)
     acc = min(1,exp(lacc1 - lacc2))
