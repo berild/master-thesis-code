@@ -43,8 +43,8 @@ amis_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_amis$x, y=eta_kern_
 save(amis_w_inla_mod, file = "./sims/sem-amis-w-inla.Rdata")
 
 source("./sem/sem_is_w_inla.R")
-is_w_inla_mod <- is.w.inla(data = df, init = init, prior.rho,
-                          dq.rho, rq.rho,fit.inla, N_0 = 800, N = 10000)
+is_w_inla_mod <- is.w.inla(data = turnout, init = init, prior.rho.lambda,
+                           dq.rho.lambda, rq.rho.lambda,fit.inla, N_0 = 800, N = 10000)
 save(is_w_inla_mod, file = "./sims/sem-is-w-inla.Rdata")
 eta_kern_is = kde2d.weighted(x = is_w_inla_mod$eta[,1], y = is_w_inla_mod$eta[,2], w = is_w_inla_mod$weight/(sum(is_w_inla_mod$weight)), n = 100, lims = c(-1,1,-1,1))
 is_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_is$x, y=eta_kern_is$y), z=as.vector(eta_kern_is$z))
