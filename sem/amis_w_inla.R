@@ -126,7 +126,7 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     weight[1:(N_tmp - N_t[t])] = delta.weight$weight
     theta = calc.theta(theta,weight,eta,i_tot,t+2)
   }
-  weight = exp(weight - max(weight)
+  weight = exp(weight - max(weight))
   return(list(eta = eta,
               theta = theta,
               margs = lapply(margs, function(x){fit.marginals(weight,x)}),
