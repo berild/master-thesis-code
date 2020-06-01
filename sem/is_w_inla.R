@@ -52,7 +52,7 @@ is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = 200, N 
     eta[i,]= is.list[[i]]$eta
     weight[i] = is.list[[i]]$weight
   }
-  theta = calc.theta(theta,weight,eta,length(eta),2)
+  theta = calc.theta(theta,weight,eta,N_0,2)
   margs = NA
   eta = matrix(NA, ncol = length(init$mu), nrow = N_0)
   weight = numeric(N)
