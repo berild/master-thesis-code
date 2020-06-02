@@ -14,6 +14,7 @@ ggplot() +
 ggplot() + 
   geom_line(data = amis_w_inla_mod$eta_kern[[2]],aes(x=x,y=y)) 
 
+
 ggplot() +
   geom_line(data = amis_w_inla_mod$pqr,aes(x=x,y=y,color = quants)) + 
   geom_point(data= as.data.frame(amis_w_inla_mod$data),aes(x=x,y=y))+

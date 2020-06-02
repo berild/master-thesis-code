@@ -110,6 +110,10 @@ store.post <- function(marg,margs,j,n.prop){
 }
 
 amis_kde <- function(eta,weight){
+  browser()
+  usable = (weight/sum(weight))>1e-10
+  eta = eta[usable,]
+  weight = weight[usable]
   return(lapply(seq(ncol(eta)), function(x){
     as.data.frame(density(x = eta[,x],
                    weights = weight/sum(weight), 
