@@ -44,7 +44,7 @@ init = list(mu = c(0,0),cov = 4*diag(2))
 mod = gaussian_model("D51",n=500)
 amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param,
                               dq.param, rq.param, fit.inla.gaussian,
-                              N_t = seq(25,50,1), N_0 = 25,
+                              N_t = seq(25,50,1)*10, N_0 = 250,
                               pqr = "gaussian",kde = T)
 amis_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gaussian")
 amis_w_inla_mod$data = mod$data

@@ -88,11 +88,11 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   t = 0
   res = list()
   res$data = data
-  amis.list = lapply(seq(N_0),function(x){
+  amis.list = mclapply(seq(N_0),function(x){
     par.amis(x, data, theta, t, N_0, 
              N_t, N_tmp, prior, d.prop,
              r.prop, fit.inla)
-  })#, mc.set.seed = TRUE, mc.cores = ncores)
+  }, mc.set.seed = TRUE, mc.cores = ncores)
   for (ele in amis.list){
     setTxtProgressBar(pb, i_tot)
     i_tot = i_tot + 1
@@ -108,11 +108,11 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   # adaptive importance sampling
   for (t in seq(length(N_t))){
     N_tmp = N_tmp + N_t[t]
-    amis.list = lapply(seq(N_t[t]),function(x){
+    amis.list = mclapply(seq(N_t[t]),function(x){
       par.amis(x, data, theta, t, N_0, 
                N_t, N_tmp, prior, d.prop,
                r.prop, fit.inla)
-    })#,mc.set.seed = TRUE, mc.cores = ncores)
+    },mc.set.seed = TRUE, mc.cores = ncores)
     for (ele in amis.list){
       setTxtProgressBar(pb, i_tot)
       i_tot = i_tot + 1
