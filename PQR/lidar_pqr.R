@@ -5,8 +5,8 @@ library(ggpubr)
 library(Brq)
 library(INLA)
 library(spatstat)
-source("./PQR/pqr_general_functions.R")
-source("./PQR/pqr_amis_w_inla.R")
+source("./PQR/general_functions.R")
+source("./PQR/amis_w_inla.R")
 library(SemiPar)
 
 data(lidar)
@@ -17,7 +17,7 @@ mod = inla(formula,  data = lidar,
            control.predictor = list(compute = T))
 
 
-fit.inla <- function(data,eta){
+fit.inla.rw2 <- function(data,eta){
   formula = logratio ~ f(range, model = "rw2", constr = T, scale.model =  F)
   res = inla(formula, 
              data = data,
