@@ -43,6 +43,7 @@ is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = 200, N 
   theta$a.cov[,,1] = init$cov
   starttime = Sys.time()
   times = numeric(N)
+  res = list()
   pb <- txtProgressBar(min = 0, max = N+N_0, style = 3)
   is.list = mclapply(seq(N_0), function(x){
     par.is(x, data, theta, 1, prior, d.prop,r.prop, fit.inla)
@@ -80,9 +81,4 @@ is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = 200, N 
     res$pqr = pqr_inla(data,res$margs,res$eta_kern,type = pqr) 
   }
   return(res)
-  return(list(eta = eta,
-              theta = theta,
-              margs = lapply(margs, function(x){fit.marginals(weight,x)}),
-              weight = weight,
-              times = times))
 }

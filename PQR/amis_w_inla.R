@@ -87,7 +87,6 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   N_tmp = N_0
   t = 0
   res = list()
-  res$data = data
   amis.list = mclapply(seq(N_0),function(x){
     par.amis(x, data, theta, t, N_0, 
              N_t, N_tmp, prior, d.prop,
