@@ -50,7 +50,7 @@ source("./sem/general_functions.R")
 # is_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_is$x, y=eta_kern_is$y), z=as.vector(eta_kern_is$z))
 # save(is_w_inla_mod, file = "./sims/sem-is-w-inla.Rdata")
 
-init = list(mu = c(0,0),cov = diag(0.5))
+init = list(mu = c(0,0),cov = 0.5*diag(2))
 source("./sem/mcmc_w_inla.R")
 mcmc_w_inla_mod <- mcmc.w.inla(data = turnout, init = init,
                                prior.rho.lambda, dq.rho.lambda, rq.rho.lambda, fit.inla,
