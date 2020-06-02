@@ -110,7 +110,6 @@ store.post <- function(marg,margs,j,n.prop){
 }
 
 amis_kde <- function(eta,weight){
-  browser()
   usable = (weight/sum(weight))>1e-10
   eta = eta[usable,]
   weight = weight[usable]
