@@ -6,10 +6,10 @@ library(INLA)
 library(spatstat)
 library(SemiPar)
 
-source("./PQR/general_functions.R")
-source("./PQR/amis_w_inla.R")
-source("./PQR/is_w_inla.R")
-load("./PQR/pqr-models.Rdata")
+source("./pqr/general_functions.R")
+source("./pqr/amis_w_inla.R")
+source("./pqr/is_w_inla.R")
+load("./pqr/pqr-models.Rdata")
 
 
 ggamma__model <- function(mod, n = 200){
