@@ -40,53 +40,53 @@ gaussian_model <- function(mod, n = 200){
 
 init = list(mu = c(0,0),cov = 4*diag(2))
 
-# D51 data
-mod = gaussian_model("D51",n=500)
-amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param,
-                              dq.param, rq.param, fit.inla.gaussian,
-                              N_t = seq(25,50,1)*10, N_0 = 250,
-                              pqr = "gaussian",kde = T)
-amis_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gaussian")
-amis_w_inla_mod$mod = mod
-save(amis_w_inla_mod, file = "./sims/pqr-gaussian1-amis-w-inla.Rdata")
-is_w_inla_mod = is.w.inla(data = mod$data, init = init, prior.param,
-                          dq.param, rq.param, fit.inla.gaussian,
-                          N_0 = 800, N = 10000, pqr = "gaussian", kde = T)
-is_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gaussian")
-is_w_inla_mod$mod = mod
-save(is_w_inla_mod, file = "./sims/pqr-gaussian1-is-w-inla.Rdata")
-
-mod = ggamma__model("D51",n=500)
-amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param,
-                              dq.param, rq.param, fit.inla.ggamma,
-                              N_t = seq(25,50,1)*10, N_0 = 250,
-                              pqr = "gamma",kde = T)
-amis_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gamma")
-amis_w_inla_mod$mod = mod
-save(amis_w_inla_mod, file = "./sims/pqr-gamma1-amis-w-inla.Rdata")
-is_w_inla_mod = is.w.inla(data = mod$data, init = init, prior.param,
-                          dq.param, rq.param, fit.inla.ggamma,
-                          N_0 = 800, N = 10000, pqr = "gamma", kde = T)
-is_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gamma")
-is_w_inla_mod$mod = mod
-save(is_w_inla_mod, file = "./sims/pqr-gamma1-is-w-inla.Rdata")
-
-
+# # D51 data
+# mod = gaussian_model("D51",n=500)
+# amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param,
+#                               dq.param, rq.param, fit.inla.gaussian,
+#                               N_t = seq(25,50,1)*10, N_0 = 250,
+#                               pqr = "gaussian",kde = T)
+# amis_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gaussian")
+# amis_w_inla_mod$mod = mod
+# save(amis_w_inla_mod, file = "./sims/pqr-gaussian1-amis-w-inla.Rdata")
+# is_w_inla_mod = is.w.inla(data = mod$data, init = init, prior.param,
+#                           dq.param, rq.param, fit.inla.gaussian,
+#                           N_0 = 800, N = 10000, pqr = "gaussian", kde = T)
+# is_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gaussian")
+# is_w_inla_mod$mod = mod
+# save(is_w_inla_mod, file = "./sims/pqr-gaussian1-is-w-inla.Rdata")
+# 
+# mod = ggamma__model("D51",n=500)
+# amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param,
+#                               dq.param, rq.param, fit.inla.ggamma,
+#                               N_t = seq(25,50,1)*10, N_0 = 250,
+#                               pqr = "gamma",kde = T)
+# amis_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gamma")
+# amis_w_inla_mod$mod = mod
+# save(amis_w_inla_mod, file = "./sims/pqr-gamma1-amis-w-inla.Rdata")
+# is_w_inla_mod = is.w.inla(data = mod$data, init = init, prior.param,
+#                           dq.param, rq.param, fit.inla.ggamma,
+#                           N_0 = 800, N = 10000, pqr = "gamma", kde = T)
+# is_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gamma")
+# is_w_inla_mod$mod = mod
+# save(is_w_inla_mod, file = "./sims/pqr-gamma1-is-w-inla.Rdata")
+# 
+# 
 # D52 data
 mod = gaussian_model("D52",n=500)
-amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param,
-                              dq.param, rq.param, fit.inla.gaussian,
-                              N_t = seq(25,50,1)*10, N_0 = 250,
-                              pqr = "gaussian",kde = T)
-amis_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gaussian")
-amis_w_inla_mod$mod = mod
-save(amis_w_inla_mod, file = "./sims/pqr-gaussian2-amis-w-inla.Rdata")
-is_w_inla_mod = is.w.inla(data = mod$data, init = init, prior.param,
-                          dq.param, rq.param, fit.inla.gaussian,
-                          N_0 = 800, N = 10000, pqr = "gaussian", kde = T)
-is_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gaussian")
-is_w_inla_mod$mod = mod
-save(is_w_inla_mod, file = "./sims/pqr-gaussian2-is-w-inla.Rdata")
+# amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param,
+#                               dq.param, rq.param, fit.inla.gaussian,
+#                               N_t = seq(25,50,1)*10, N_0 = 250,
+#                               pqr = "gaussian",kde = T)
+# amis_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gaussian")
+# amis_w_inla_mod$mod = mod
+# save(amis_w_inla_mod, file = "./sims/pqr-gaussian2-amis-w-inla.Rdata")
+# is_w_inla_mod = is.w.inla(data = mod$data, init = init, prior.param,
+#                           dq.param, rq.param, fit.inla.gaussian,
+#                           N_0 = 800, N = 10000, pqr = "gaussian", kde = T)
+# is_w_inla_mod$pqr_truth = pqr_truth_lines(mod$data,mod$params,type="gaussian")
+# is_w_inla_mod$mod = mod
+# save(is_w_inla_mod, file = "./sims/pqr-gaussian2-is-w-inla.Rdata")
 
 mod = ggamma__model("D52",n=500)
 amis_w_inla_mod = amis.w.inla(data = mod$data, init = init, prior.param,
