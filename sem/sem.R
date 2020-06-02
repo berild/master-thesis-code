@@ -50,11 +50,11 @@ source("./sem/general_functions.R")
 # is_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_is$x, y=eta_kern_is$y), z=as.vector(eta_kern_is$z))
 # save(is_w_inla_mod, file = "./sims/sem-is-w-inla.Rdata")
 
-init$cov = 0.1*init$cov
+init = list(mu = c(0,0),cov = diag(0.5))
 source("./sem/mcmc_w_inla.R")
 mcmc_w_inla_mod <- mcmc.w.inla(data = turnout, init = init,
                                prior.rho.lambda, dq.rho.lambda, rq.rho.lambda, fit.inla,
-                               n.samples = 100500, n.burnin = 500, n.thin = 10)
+                               n.samples = 1000, n.burnin = 500, n.thin = 1)
 save(mcmc_w_inla_mod, file = "./sims/sem-mcmc-w-inla.Rdata")
 eta_kern_mcmc = kde2d.weighted(x = mcmc_w_inla_mod$eta[,1], y = mcmc_w_inla_mod$eta[,2], w = rep(1,nrow(mcmc_w_inla_mod$eta))/nrow(mcmc_w_inla_mod$eta), n = 100, lims = c(-1,1,-1,1))
 mcmc_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_mcmc$x, y=eta_kern_mcmc$y), z=as.vector(eta_kern_mcmc$z))
