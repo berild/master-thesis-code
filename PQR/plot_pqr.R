@@ -23,13 +23,13 @@ ggplot() +
 #DXX[DXX$mod=="D54",][-1],type ="gamma")
 tmp = DXX[DXX$mod=="D54",][-1]
 ggplot() +
-  geom_line(data = amis_w_inla_mod$pqr,aes(x=x,y=y,color = quants, linetype = "AMIS w/ INLA")) + 
+  #geom_line(data = amis_w_inla_mod$pqr,aes(x=x,y=y,color = quants, linetype = "AMIS w/ INLA")) + 
   geom_line(data= amis_w_inla_mod$pqr_truth,aes(x=x,y=y,color = quants,linetype = "Truth"))+
-  geom_point(data=as.data.frame(amis_w_inla_mod$data),aes(x=x,y=y),alpha = 0.4) + 
+  #geom_point(data=as.data.frame(amis_w_inla_mod$data),aes(x=x,y=y),alpha = 0.4) + 
   labs(y="y",x="x",color = "Quantiles", linetype="") + 
-  annotate("text",label=paste("a =", tmp[1],"   b =", tmp[2],"   c =",tmp[3],"  d =",tmp[4]),
-           x = 0.5, y = 0.4) + 
-  coord_cartesian(ylim = c(-9,0.45)) + 
+  #annotate("text",label=paste("a =", tmp[1],"   b =", tmp[2],"   c =",tmp[3],"  d =",tmp[4]),
+  #         x = 0.5, y = 0.4) + 
+  #coord_cartesian(ylim = c(-9,0.45)) + 
   theme_bw() 
 
 

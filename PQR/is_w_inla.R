@@ -31,7 +31,7 @@ par.is <- function(x, data, theta, t, prior, d.prop, r.prop, fit.inla){
 
 is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = 200, N = 400, pqr = NA, kde = NA){
   if (detectCores()>10){
-    ncores = 20
+    ncores = 10
   }else{
     ncores = detectCores()
   }
