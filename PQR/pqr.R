@@ -169,34 +169,34 @@ init = list(mu = c(0,0),cov = 4*diag(2))
 # 
 # 
 # Lidar data
-# data(lidar)
-# prior.param <- function(x, log = TRUE) {
-#   sum(dnorm(x, 0, 100, log = log))
-# }
-# 
-# init = list(mu = c(14,0),cov = diag(c(6,1)))
-# 
-# amis_w_inla_mod = amis.w.inla(data = lidar, init = init, prior.param,
-#                               dq.param, rq.param, fit.inla.rw2,
-#                               N_t = seq(25,50,1)*10, N_0 = 250,kde = T)
-# amis_w_inla_mod$mod = lidar
-# save(amis_w_inla_mod, file = "./sims/pqr-gaussian-lidar-amis-w-inla.Rdata")
-# is_w_inla_mod = is.w.inla(data = lidar, init = init, prior.param,
-#                           dq.param, rq.param, fit.inla.rw2,
-#                           N_0 = 800, N = 10000, kde = T)
-# is_w_inla_mod$mod = lidar
-# save(is_w_inla_mod, file = "./sims/pqr-gaussian-lidar-is-w-inla.Rdata")
+data(lidar)
+prior.param <- function(x, log = TRUE) {
+  sum(dnorm(x, 0, 100, log = log))
+}
 
-# ImmunogG data
-data("ImmunogG")
-init = list(mu = c(0,0),cov = 2*diag(2))
-amis_w_inla_mod = amis.w.inla(data = list(x=ImmunogG$Age,y = ImmunogG$IgG),
-                              init = init, prior.param, dq.param, rq.param, fit.inla.ggamma,
-                              N_t = seq(25,50,1)*10, N_0 = 250, pqr = "gamma",kde = T)
-amis_w_inla_mod$mod = list(x=ImmunogG$Age,y = ImmunogG$IgG)
-save(amis_w_inla_mod, file = "./sims/pqr-gamma-ImmunogG-amis-w-inla.Rdata")
-is_w_inla_mod = is.w.inla(data = list(x=ImmunogG$Age,y = ImmunogG$IgG),
-                          init = init, prior.param, dq.param, rq.param, fit.inla.ggamma,
-                          N_0 = 800, N = 10000, pqr = "gamma", kde = T)
-is_w_inla_mod$mod = list(x=ImmunogG$Age,y = ImmunogG$IgG)
-save(is_w_inla_mod, file = "./sims/pqr-gamma-ImmunogG-is-w-inla.Rdata")
+init = list(mu = c(14,0),cov = diag(c(6,0.1)))
+
+amis_w_inla_mod = amis.w.inla(data = lidar, init = init, prior.param,
+                              dq.param, rq.param, fit.inla.rw2,
+                              N_t = seq(25,50,1)*10, N_0 = 250,kde = T)
+amis_w_inla_mod$mod = lidar
+save(amis_w_inla_mod, file = "./sims/pqr-gaussian-lidar-amis-w-inla.Rdata")
+is_w_inla_mod = is.w.inla(data = lidar, init = init, prior.param,
+                          dq.param, rq.param, fit.inla.rw2,
+                          N_0 = 800, N = 10000, kde = T)
+is_w_inla_mod$mod = lidar
+save(is_w_inla_mod, file = "./sims/pqr-gaussian-lidar-is-w-inla.Rdata")
+# 
+# # ImmunogG data
+# data("ImmunogG")
+# init = list(mu = c(0,0),cov = 2*diag(2))
+# amis_w_inla_mod = amis.w.inla(data = list(x=ImmunogG$Age,y = ImmunogG$IgG),
+#                               init = init, prior.param, dq.param, rq.param, fit.inla.ggamma,
+#                               N_t = seq(25,50,1)*10, N_0 = 250, pqr = "gamma",kde = T)
+# amis_w_inla_mod$mod = list(x=ImmunogG$Age,y = ImmunogG$IgG)
+# save(amis_w_inla_mod, file = "./sims/pqr-gamma-ImmunogG-amis-w-inla.Rdata")
+# is_w_inla_mod = is.w.inla(data = list(x=ImmunogG$Age,y = ImmunogG$IgG),
+#                           init = init, prior.param, dq.param, rq.param, fit.inla.ggamma,
+#                           N_0 = 800, N = 10000, pqr = "gamma", kde = T)
+# is_w_inla_mod$mod = list(x=ImmunogG$Age,y = ImmunogG$IgG)
+# save(is_w_inla_mod, file = "./sims/pqr-gamma-ImmunogG-is-w-inla.Rdata")
