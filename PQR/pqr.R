@@ -174,7 +174,7 @@ prior.param <- function(x, log = TRUE) {
   sum(dnorm(x, 0, 100, log = log))
 }
 
-init = list(mu = c(14,0),cov = diag(6,1))
+init = list(mu = c(14,0),cov = diag(c(6,1)))
 
 amis_w_inla_mod = amis.w.inla(data = lidar, init = init, prior.param,
                               dq.param, rq.param, fit.inla.rw2,
