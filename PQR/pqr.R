@@ -189,13 +189,14 @@ init = list(mu = c(0,0),cov = 4*diag(2))
 
 # ImmunogG data
 data("ImmunogG")
-# amis_w_inla_mod = amis.w.inla(data = list(x=ImmunogG$Age,y = ImmunogG$IgG),
-#                               init = init, prior.param, dq.param, rq.param, fit.inla.ggamma,
-#                               N_t = seq(25,50,1)*10, N_0 = 250, pqr = "gamma",kde = T)
-# amis_w_inla_mod$mod = list(x=ImmunogG$Age,y = ImmunogG$IgG)
-# save(amis_w_inla_mod, file = "./sims/pqr-gamma-ImmunogG-amis-w-inla.Rdata")
+init = list(mu = c(0,0),cov = 2*diag(2))
+amis_w_inla_mod = amis.w.inla(data = list(x=ImmunogG$Age,y = ImmunogG$IgG),
+                              init = init, prior.param, dq.param, rq.param, fit.inla.ggamma,
+                              N_t = seq(25,50,1)*10, N_0 = 250, pqr = "gamma",kde = T)
+amis_w_inla_mod$mod = list(x=ImmunogG$Age,y = ImmunogG$IgG)
+save(amis_w_inla_mod, file = "./sims/pqr-gamma-ImmunogG-amis-w-inla.Rdata")
 is_w_inla_mod = is.w.inla(data = list(x=ImmunogG$Age,y = ImmunogG$IgG),
                           init = init, prior.param, dq.param, rq.param, fit.inla.ggamma,
-                          N_0 = 800, N = 10000)#, pqr = "gamma", kde = T)
+                          N_0 = 800, N = 10000, pqr = "gamma", kde = T)
 is_w_inla_mod$mod = list(x=ImmunogG$Age,y = ImmunogG$IgG)
 save(is_w_inla_mod, file = "./sims/pqr-gamma-ImmunogG-is-w-inla.Rdata")
