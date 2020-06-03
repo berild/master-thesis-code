@@ -3,28 +3,28 @@ library(INLA)
 
 ggplot() + 
   geom_line(data = as.data.frame(amis_w_inla_mod$margs$a), aes(x=x,y=y, color = "AMIS with INLA")) + 
-  #geom_line(data = as.data.frame(is_w_inla_mod$margs$a),aes(x=x,y=y,color="IS with INLA")) + 
+  geom_line(data = as.data.frame(is_w_inla_mod$margs$a),aes(x=x,y=y,color="IS with INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$mod$params$a) + 
   labs(color = "Method",title="a") + 
   theme_bw()
 
 ggplot() + 
   geom_line(data = as.data.frame(amis_w_inla_mod$margs$b), aes(x=x,y=y, color = "AMIS with INLA")) + 
-  #geom_line(data = as.data.frame(is_w_inla_mod$margs$b),aes(x=x,y=y,color="IS with INLA")) + 
+  geom_line(data = as.data.frame(is_w_inla_mod$margs$b),aes(x=x,y=y,color="IS with INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$mod$params$b) + 
   labs(color = "Method",title="b") + 
   theme_bw()
 
 ggplot() + 
   geom_line(data = amis_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="AMIS with INLA")) + 
-  #geom_line(data = is_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="IS with INLA")) + 
+  geom_line(data = is_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="IS with INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$mod$params$c) + 
   labs(color = "Method",title = "c") + 
   theme_bw()
 
 ggplot() + 
   geom_line(data = amis_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="AMIS with INLA")) + 
-  #geom_line(data = is_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="IS with INLA")) + 
+  geom_line(data = is_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="IS with INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$mod$params$d) + 
   labs(color = "Method",title = "d") + 
   theme_bw()
@@ -35,6 +35,34 @@ ggplot() +
   geom_line(data = amis_w_inla_mod$pqr_truth,aes(x=x,y=y,color = quants,linetype="Truth")) + 
   geom_point(data = as.data.frame(amis_w_inla_mod$mod$data),aes(x=x,y=y)) + 
   labs(color="Quantiles",title="Gaussian M1",linetype="Method") + 
+  theme_bw()
+
+
+
+# Lidar
+
+ggplot() + 
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$intercept), aes(x=x,y=y, color = "AMIS with INLA")) + 
+  #geom_line(data = as.data.frame(is_w_inla_mod$margs$intercept),aes(x=x,y=y,color="IS with INLA")) + 
+  labs(color = "Method",title="a") + 
+  theme_bw()
+
+ggplot() + 
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$prec.range), aes(x=x,y=y, color = "AMIS with INLA")) + 
+  #geom_line(data = as.data.frame(is_w_inla_mod$margs$intercept),aes(x=x,y=y,color="IS with INLA")) + 
+  labs(color = "Method",title="a") + 
+  theme_bw()
+
+ggplot() + 
+  geom_line(data = amis_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="AMIS with INLA")) + 
+  #geom_line(data = is_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="IS with INLA")) +  
+  labs(color = "Method",title = "c") + 
+  theme_bw()
+
+ggplot() + 
+  geom_line(data = amis_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="AMIS with INLA")) + 
+  #geom_line(data = is_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="IS with INLA")) +  
+  labs(color = "Method",title = "d") + 
   theme_bw()
 
 
