@@ -8,7 +8,7 @@ par.is <- function(x, data, theta, t, prior, d.prop, r.prop, fit.inla){
   while(INLA_crash){
     tryCatch({
       eta = r.prop(theta$a.mu[t,], sigma = theta$a.cov[,,t])
-      mod = fit.inla(data = data ,eta = eta)
+      mod = fit.inla(data = data ,eta)
       INLA_crash = F 
     },error=function(e){
     },finally={})

@@ -97,9 +97,9 @@ fit.inla <- function(data, m.delta) {
 }
 
 dq.delta <- function(x, y, sigma, log = TRUE) {
-  loc = log(x) - 1/2*(1+log(diag(sigma))-2*log(x))
-  scale = sqrt(1 + log(diag(sigma)) - 2*log(x))
-  res <- dlnorm(y, meanlog = loc, sdlog = scale, log = log)	
+  #loc = log(x) - 1/2*(1+log(diag(sigma))-2*log(x))
+  #scale = sqrt(1 + log(diag(sigma)) - 2*log(x))
+  res <- dlnorm(y, meanlog = x, sdlog = sqrt(diag(sigma)), log = log)	
   if(log) {
     return(sum(res)) 
   } else {
@@ -108,9 +108,9 @@ dq.delta <- function(x, y, sigma, log = TRUE) {
 }
 #Generate random values
 rq.delta <- function(x, sigma) {
-  loc = log(x) - 1/2*(1+log(diag(sigma))-2*log(x))
-  scale = sqrt(1 + log(diag(sigma)) - 2*log(x))
-  rlnorm(length(x), meanlog = loc, sdlog = scale)
+  #loc = log(x) - 1/2*(1+log(diag(sigma))-2*log(x))
+  #scale = sqrt(1 + log(diag(sigma)) - 2*log(x))
+  rlnorm(length(x), meanlog = x, sdlog = sqrt(diag(sigma)))
 }
 
 #Prior for delta (log-normal)
@@ -125,12 +125,13 @@ prior.delta <- function(x, mulog = 0, sigmalog = sqrt(1/.1), log = TRUE) {
 }
 
 
-init = list(mu = exp(log(c(0.2522, 0.2753, 0.0558)) + 1/2), cov = exp(2*c(0.2522, 0.2753, 0.0558))*diag(3))
-source("./disease/amis_w_inla.R")
-amis_w_inla_mod <- amis.w.inla(data = d, init = init, prior.delta,
-                               dq.delta, rq.delta, fit.inla,
-                               N_t = seq(25,50,1)*10, N_0 = 250)
-save(amis_w_inla_mod, file = "./sims/disease-amis-w-inla.Rdata")
+#init = list(mu = exp(log(c(0.2522, 0.2753, 0.0558)) + 1/2), cov = exp(2*c(0.2522, 0.2753, 0.0558))*diag(3))
+init = list(mu = log(c(0.2522, 0.2753, 0.0558)), cov = 2*diag(3))
+# source("./disease/amis_w_inla.R")
+# amis_w_inla_mod <- amis.w.inla(data = d, init = init, prior.delta,
+#                                dq.delta, rq.delta, fit.inla,
+#                                N_t = seq(25,50,1)*10, N_0 = 250)
+# save(amis_w_inla_mod, file = "./sims/disease-amis-w-inla.Rdata")
 
 source("./disease/is_w_inla.R")
 is_w_inla_mod <- is.w.inla(data = d, init = init, prior.delta,
