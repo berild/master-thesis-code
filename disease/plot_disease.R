@@ -83,7 +83,7 @@ ggplot() +
 
 ggplot() + 
   geom_contour(data = amis_w_inla_mod$eta_joint_kern$eta12, aes(x = x, y = y, z = z, color = "AMIS with INLA"),bins = 6) +
-  geom_contour(data = is_w_inla_mod$eta_joint_kern$eta12, aes(x = x, y = y, z = z, color = "IS with INLA"),bins = 6) +
+  #geom_contour(data = is_w_inla_mod$eta_joint_kern$eta12, aes(x = x, y = y, z = z, color = "IS with INLA"),bins = 6) +
   labs(color = "",x=expression(delta^(1)),y=expression(delta^(2)),linetype="") +
   theme_bw() +
   coord_cartesian(xlim = c(0,1),ylim=c(0,1)) + 
@@ -91,7 +91,7 @@ ggplot() +
 
 ggplot() + 
   geom_contour(data = amis_w_inla_mod$eta_joint_kern$eta13, aes(x = x, y = y, z = z, color = "AMIS with INLA"),bins = 6) +
-  geom_contour(data = is_w_inla_mod$eta_joint_kern$eta13, aes(x = x, y = y, z = z, color = "IS with INLA"),bins = 6) +
+  #geom_contour(data = is_w_inla_mod$eta_joint_kern$eta13, aes(x = x, y = y, z = z, color = "IS with INLA"),bins = 6) +
   labs(color = "",x=expression(delta^(1)),y=expression(delta^(3)),linetype="") +
   theme_bw() +
   coord_cartesian(xlim = c(0,1),ylim=c(0,1)) + 
@@ -99,7 +99,7 @@ ggplot() +
 
 ggplot() + 
   geom_contour(data = amis_w_inla_mod$eta_joint_kern$eta23, aes(x = x, y = y, z = z, color = "AMIS with INLA"),bins = 6) +
-  geom_contour(data = is_w_inla_mod$eta_joint_kern$eta23, aes(x = x, y = y, z = z, color = "IS with INLA"),bins = 6) +
+  #geom_contour(data = is_w_inla_mod$eta_joint_kern$eta23, aes(x = x, y = y, z = z, color = "IS with INLA"),bins = 6) +
   labs(color = "",x=expression(delta^(2)),y=expression(delta^(3)),linetype="") +
   theme_bw() +
   coord_cartesian(xlim = c(0,1),ylim=c(0,1)) + 
