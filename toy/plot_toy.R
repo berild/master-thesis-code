@@ -45,11 +45,16 @@ eta_joint_kern_mcmc = kde2d.weighted(x = mcmc_w_inla_mod$eta[,1], y = mcmc_w_inl
 amis_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_amis$x, y=eta_joint_kern_amis$y), z=as.vector(eta_joint_kern_amis$z))
 is_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_is$x, y=eta_joint_kern_is$y), z=as.vector(eta_joint_kern_is$z))
 mcmc_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_mcmc$x, y=eta_joint_kern_mcmc$y), z=as.vector(eta_joint_kern_mcmc$z))
+
 ggplot() + 
   geom_line(data = amis_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,color="AMIS with INLA")) +
   geom_line(data = is_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,color="IS with INLA")) +
-  geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,color="MCMC with INLA")) +
-  labs(color = "", x = "",y="",title=expression(delta^(1)),linetype = "")+
+  geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,color="MCMC with INLA")) + 
+  geom_line(data = data.frame(inla_mod$marginals.fixed$x1),aes(x=x,y=y,color = "INLA")) + 
+  geom_vline(data = data.frame(x = 1), aes(xintercept = 1, linetype = "Truth")) + 
+  scale_linetype_manual(values= "dotdash") + 
+  labs(color = "", x = "",y="",title=expression(beta[1]),linetype = "") + 
+  coord_cartesian(xlim = c(-0.5,2.5))+
   theme_bw() + 
   theme(legend.position="bottom",plot.title = element_text(hjust = 0.5))
 
@@ -58,6 +63,11 @@ ggplot() +
   geom_line(data = is_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,color="IS with INLA")) +
   geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,color="MCMC with INLA")) +
   labs(color = "", x = "",y="",title=expression(delta^(2)),linetype = "")+
+  geom_line(data = data.frame(inla_mod$marginals.fixed$x2),aes(x=x,y=y,color = "INLA")) + 
+  geom_vline(data = data.frame(x = 1), aes(xintercept = -1, linetype = "Truth")) + 
+  scale_linetype_manual(values= "dotdash") + 
+  labs(color = "", x = "",y="",title=expression(beta[2]),linetype = "") + 
+  coord_cartesian(xlim = c(-2.5,0.5))+
   theme_bw() + 
   theme(legend.position="bottom",plot.title = element_text(hjust = 0.5))
 
@@ -72,31 +82,46 @@ ggplot() +
 
 
 ggplot() + 
-  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$eta[,1])), y = mcmc_w_inla_mod$eta[,1]),aes(x=x,y=y)) + 
   geom_polygon(data = data.frame(x = inla_mod$marginals.fixed$x1[,1], 
-                              y = 1500-inla_mod$marginals.fixed$x1[,2]/max(inla_mod$marginals.fixed$x1[,2])*1500), aes(x=y,y=x,fill = "target"),alpha = 0.5) +
+                                 y = 10500+inla_mod$marginals.fixed$x1[,2]/max(inla_mod$marginals.fixed$x1[,2])*2000), aes(x=y,y=x,fill = "target"),alpha = 0.3) +
+  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$full_eta[,1])), y = mcmc_w_inla_mod$full_eta[,1]),aes(x=x,y=y)) + 
   geom_path(data = data.frame(x = mcmc_w_inla_mod$eta_uni_kerns[[1]]$x,
-                                 y = 1500 - mcmc_w_inla_mod$eta_uni_kerns[[1]]$y/max(mcmc_w_inla_mod$eta_uni_kerns[[1]]$y)*1500),aes(x=y,y=x,color = "estimate"))+
+                                 y = 10500+ mcmc_w_inla_mod$eta_uni_kerns[[1]]$y/max(mcmc_w_inla_mod$eta_uni_kerns[[1]]$y)*2000),aes(x=y,y=x,color = "estimate"))+
   scale_color_manual(values = "blue") + 
   scale_fill_manual(values = "red") + 
   labs(color = "",fill = "") + 
   theme_bw()
 
-amis_adaptive = lapply(seq(13), function(x){
-  tmp2 = c(0,125, seq(20,30)*5,5*31)
-  tmp = rnorm(500,amis_w_inla_mod$theta$a.mu[x,1],amis_w_inla_mod$theta$a.cov[1,1,x])
+ggplot() + 
+  geom_polygon(data = data.frame(x = inla_mod$marginals.fixed$x2[,1], 
+                                 y = 10500+inla_mod$marginals.fixed$x2[,2]/max(inla_mod$marginals.fixed$x2[,2])*2000), aes(x=y,y=x,fill = "target"),alpha = 0.3) +
+  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$full_eta[,2])), y = mcmc_w_inla_mod$full_eta[,2]),aes(x=x,y=y)) + 
+  geom_path(data = data.frame(x = mcmc_w_inla_mod$eta_uni_kerns[[2]]$x,
+                              y = 10500+ mcmc_w_inla_mod$eta_uni_kerns[[2]]$y/max(mcmc_w_inla_mod$eta_uni_kerns[[2]]$y)*2000),aes(x=y,y=x,color = "estimate"))+
+  scale_color_manual(values = "blue") + 
+  scale_fill_manual(values = "red") + 
+  labs(color = "",fill = "") + 
+  theme_bw()
+
+amis_adaptive = lapply(c(1,2,5,10,15,20,28), function(x){
+  tmp = rnorm(500,amis_w_inla_mod$theta$a.mu[x,1],sqrt(amis_w_inla_mod$theta$a.cov[1,1,x]))
   tmp = sort(tmp)
-  y = dnorm(tmp,amis_w_inla_mod$theta$a.mu[x,1],amis_w_inla_mod$theta$a.cov[1,1,x])
-  y = sum(tmp2[1:x]) + y/max(y)*tmp2[x+1]
+  y = dnorm(tmp,amis_w_inla_mod$theta$a.mu[x,1],sqrt(amis_w_inla_mod$theta$a.cov[1,1,x]))
+  tmp2 = c(0,250, seq(25,50)*10,10*51)
+  tmp3 = c(1,2,5,10,15,20,28,29)
+  y = sum(tmp2[1:x]) + y/max(y)*sum(tmp2[(x+1):(tmp3[which(tmp3 == x)+1])])
   data.frame(x=tmp,y=y)
 })
-amis_adaptive2 = lapply(seq(13), function(x){
-  tmp2 = c(0,125, seq(20,30)*5,5*31)
+amis_adaptive2 = lapply(c(1,2,5,10,15,20,28), function(x){
+  idx = which(x == T_s)
   tmp = inla_mod$marginals.fixed$x1[,1]
   y = inla_mod$marginals.fixed$x1[,2]
-  y = sum(tmp2[1:x]) + y/max(y)*tmp2[x+1]
+  tmp2 = c(0,250, seq(25,50)*10,10*51)
+  tmp3 = c(1,2,5,10,15,20,28,29)
+  y = sum(tmp2[1:x]) + y/max(y)*sum(tmp2[(x+1):(tmp3[which(tmp3 == x)+1])])
   data.frame(x=tmp,y=y)
 })
+
 ggplot() + 
   geom_path(data = amis_adaptive[[1]],aes(x=y,y=x, color = "proposal")) + 
   geom_path(data = amis_adaptive[[2]],aes(x=y,y=x, color = "proposal")) + 
@@ -105,12 +130,6 @@ ggplot() +
   geom_path(data = amis_adaptive[[5]],aes(x=y,y=x, color = "proposal")) + 
   geom_path(data = amis_adaptive[[6]],aes(x=y,y=x, color = "proposal")) + 
   geom_path(data = amis_adaptive[[7]],aes(x=y,y=x, color = "proposal")) + 
-  geom_path(data = amis_adaptive[[8]],aes(x=y,y=x, color = "proposal")) + 
-  geom_path(data = amis_adaptive[[9]],aes(x=y,y=x, color = "proposal")) + 
-  geom_path(data = amis_adaptive[[10]],aes(x=y,y=x, color = "proposal")) + 
-  geom_path(data = amis_adaptive[[11]],aes(x=y,y=x, color = "proposal")) + 
-  geom_path(data = amis_adaptive[[12]],aes(x=y,y=x, color = "proposal")) + 
-  geom_path(data = amis_adaptive[[13]],aes(x=y,y=x, color = "proposal")) + 
   geom_polygon(data = amis_adaptive2[[1]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
   geom_polygon(data = amis_adaptive2[[2]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
   geom_polygon(data = amis_adaptive2[[3]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
@@ -118,12 +137,6 @@ ggplot() +
   geom_polygon(data = amis_adaptive2[[5]],aes(x=y,y=x,fill = "target"), alpha = 0.5) +
   geom_polygon(data = amis_adaptive2[[6]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
   geom_polygon(data = amis_adaptive2[[7]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[8]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[9]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[10]],aes(x=y,y=x,fill = "target"), alpha = 0.5) +
-  geom_polygon(data = amis_adaptive2[[11]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[12]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[13]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
   scale_color_manual(values = "red") + 
   scale_fill_manual(values = "blue") + 
   labs(color="",fill="") +
@@ -131,15 +144,15 @@ ggplot() +
   
 
 is_adaptive = lapply(seq(2), function(x){
-  tmp2 = c(0,500,1500)
-  tmp = rnorm(500,is_w_inla_mod$theta$a.mu[x,1],is_w_inla_mod$theta$a.cov[1,1,x])
+  tmp2 = c(0,800,10000)
+  tmp = rnorm(500,is_w_inla_mod$theta$a.mu[x,1],sqrt(is_w_inla_mod$theta$a.cov[1,1,x]))
   tmp = sort(tmp)
-  y = dnorm(tmp,is_w_inla_mod$theta$a.mu[x,1],is_w_inla_mod$theta$a.cov[1,1,x])
+  y = dnorm(tmp,is_w_inla_mod$theta$a.mu[x,1],sqrt(is_w_inla_mod$theta$a.cov[1,1,x]))
   y = sum(tmp2[1:x]) + y/max(y)*tmp2[x+1]
   data.frame(x=tmp,y=y)
 })
 is_adaptive2 = lapply(seq(2), function(x){
-  tmp2 = c(0,500,1500)
+  tmp2 = c(0,500,10000)
   tmp = inla_mod$marginals.fixed$x1[,1]
   y = inla_mod$marginals.fixed$x1[,2]
   y = sum(tmp2[1:x]) + y/max(y)*tmp2[x+1]
