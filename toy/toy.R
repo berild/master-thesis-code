@@ -51,12 +51,12 @@ dq.beta <- function(y, x, sigma = diag(5,2,2), log =TRUE) {
 source("./toy/amis_w_inla.R")
 amis_w_inla_mod <- amis.w.inla(data = df, init = init, prior.beta,
                                dq.beta, rq.beta, fit.inla,
-                               N_t = seq(20,30)*5, N_0 = 125)
+                               N_t = seq(25,50)*10, N_0 = 250)
 save(amis_w_inla_mod, file = "./sims/toy-amis-w-inla.Rdata")
 
 source("./toy/is_w_inla.R")
 is_w_inla_mod <- is.w.inla(data = df, init = init, prior.beta,
-                           dq.beta, rq.beta, fit.inla, N_0 = 500, N = 1500)
+                           dq.beta, rq.beta, fit.inla, N_0 = 800, N = 10000)
 save(is_w_inla_mod, file = "./sims/toy-is-w-inla.Rdata")
 
 rq.beta <- function(x, sigma = .75) {
@@ -70,5 +70,5 @@ dq.beta <- function(y, x, sigma = .75, log =TRUE) {
 init = list(mu = c(0,0),cov = 0.5*diag(2))
 source("./toy/mcmc_w_inla.R")
 mcmc_w_inla_mod <- mcmc.w.inla(data = df, init = init, prior.beta,
-                               dq.beta, rq.beta, fit.inla, n.samples = 2000, n.burnin = 500, n.thin = 1)
+                               dq.beta, rq.beta, fit.inla, n.samples = 10500, n.burnin = 500, n.thin = 1)
 save(mcmc_w_inla_mod, file = "./sims/toy-mcmc-w-inla.Rdata")

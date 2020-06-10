@@ -50,6 +50,7 @@ mcmc.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla,
       }
     }
   }
+  full_eta = eta
   eta = eta[-seq(n.burnin),]
   eta = eta[seq(from = 1, to = nrow(eta), by=n.thin),]
   return(list(eta = eta,
@@ -57,5 +58,6 @@ mcmc.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla,
               acc.vec = acc.vec,
               mlik = mlik,
               times = times,
-              data = data))
+              data = data,
+              full_eta = full_eta))
 }

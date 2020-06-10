@@ -130,3 +130,27 @@ ggplot() +
   theme_bw()
   
 
+is_adaptive = lapply(seq(2), function(x){
+  tmp2 = c(0,500,1500)
+  tmp = rnorm(500,is_w_inla_mod$theta$a.mu[x,1],is_w_inla_mod$theta$a.cov[1,1,x])
+  tmp = sort(tmp)
+  y = dnorm(tmp,is_w_inla_mod$theta$a.mu[x,1],is_w_inla_mod$theta$a.cov[1,1,x])
+  y = sum(tmp2[1:x]) + y/max(y)*tmp2[x+1]
+  data.frame(x=tmp,y=y)
+})
+is_adaptive2 = lapply(seq(2), function(x){
+  tmp2 = c(0,500,1500)
+  tmp = inla_mod$marginals.fixed$x1[,1]
+  y = inla_mod$marginals.fixed$x1[,2]
+  y = sum(tmp2[1:x]) + y/max(y)*tmp2[x+1]
+  data.frame(x=tmp,y=y)
+})
+ggplot() + 
+  geom_path(data = amis_adaptive[[1]],aes(x=y,y=x, color = "proposal")) + 
+  geom_path(data = amis_adaptive[[2]],aes(x=y,y=x, color = "proposal")) + 
+  geom_polygon(data = amis_adaptive2[[1]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
+  geom_polygon(data = amis_adaptive2[[2]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
+  scale_color_manual(values = "red") + 
+  scale_fill_manual(values = "blue") + 
+  labs(color="",fill="") +
+  theme_bw()
