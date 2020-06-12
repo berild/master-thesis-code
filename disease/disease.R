@@ -16,8 +16,11 @@ names(spdf)
 
 #Set shorter names
 names(spdf) <- c("Obs.Cb", "Esp.Cb", "Obs.Eso", "Esp.Eso", 
-                 "Obs.Est", "Esp.Est")
+                 "Obs.Est", "Esp.Est","SMR.Cb","SMR.Eso","SMR.Est")
 
+spplot(spdf["SMR.Cb"],col.regions= hcl.colors(20,palette = hcl.pals("sequential")[20], alpha = 1, rev = TRUE),colorkey = list(space = "bottom"))
+spplot(spdf["SMR.Eso"],col.regions= hcl.colors(20,palette = hcl.pals("sequential")[20], alpha = 1, rev = TRUE),colorkey = list(space = "bottom"))
+spplot(spdf["SMR.Est"],col.regions= hcl.colors(40,palette = hcl.pals("sequential")[20], alpha = 1, rev = TRUE),colorkey = list(space = "bottom"))
 #Create dataset for INLA (n x 3)
 n <- nrow(spdf)
 d <- list(OBS = matrix(NA, nrow = n*3, ncol = 3))
@@ -40,44 +43,6 @@ W <- nb2mat(nb.spain, style = "B")
 d$r <- rep(1:3, each = n)
 d$rf <- as.factor(d$r)
 
-# Test some models with several spatial components with INLA 
-# Note: THESE ARE NOT THE MODELS YOU ARE LOOKING FOR
-
-#Formulas for models
-form <- OBS ~ -1 + rf + f(AREAID, model = "besag", graph = W)
-form.rep <- OBS ~ -1 + rf + f(AREAID, model = "besag", graph = W, replicate = r)
-form.rep2 <- OBS ~ -1 + rf + f(AREAID, model = "besag", graph = W, replicate = r) + f(AREAID.com, delta, model = "besag", graph = W)
-
-#Fit model
-res1 <- inla(form, data = d, family = rep("poisson", 3), E = d$EXP)
-
-#Fit model with replicated spatial effects
-res2 <- inla(form.rep, data = d, family = rep("poisson", 3), E = d$EXP)
-
-##
-#Fit model with specific replicated spatial effects AND common spatial effects
-##
-#
-#
-#mlik for delta = 1 : -1067.407, -1067.925
-
-
-#Define delta as the weighting for the common effect
-#d$delta <- rep(1, 3*n)
-delta.vec <- c(1.5, 2, 0.1) #Different loadings of the common effect
-d$delta <- delta.vec[d$r]
-
-
-d$AREAID.com <- d$AREAID
-res3 <- inla(form.rep2, data = d, family = rep("poisson", 3), E = d$EXP,
-             control.compute = list(dic = TRUE))
-
-spdf$SP.COM <- res3$summary.random$AREAID.com[, "mode"]
-spdf$SP.BC <- res3$summary.random$AREAID[1:n, "mode"]
-spdf$SP.EC <- res3$summary.random$AREAID[n + 1:n, "mode"]
-spdf$SP.SC <- res3$summary.random$AREAID[2*n + 1:n, "mode"]
-
-spplot(spdf, c("SP.BC", "SP.EC", "SP.SC", "SP.COM"))
 
 fit.inla <- function(data, m.delta) {
   data$delta <- m.delta[data$r]
