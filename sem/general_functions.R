@@ -5,39 +5,6 @@ require(spdep)
 require(mvtnorm)
 require(MASS)
 
-prior.rho.lambda <- function(x, log = TRUE) {
-  sum(dunif(x, -1, 1, log = log))
-}
-
-
-fit.inla <- function(data,eta){
-  res <- sac.inla(form, d = as.data.frame(turnout), W.rho = W, W.lambda = W,
-                      fhyper = list(prec = list(param = c(0.01, 0.01))),
-                      rho = eta[1],
-                      lambda = eta[2],
-                      family = "gaussian", impacts = FALSE,
-                      control.fixed = list(prec.intercept = 0.001),
-                      control.family = list(hyper = zero.variance),
-                      control.predictor = list(compute = TRUE),
-                      control.compute = list(dic = TRUE, cpo = TRUE),
-                      control.inla = list(print.joint.hyper = TRUE, #), 
-                                          strategy = "laplace", tolerance = 1e-10, h = 0.001),
-                      # Start close to ML estimate
-                      control.mode = list(theta = log(0.2), restart = TRUE),
-                      improve = FALSE,
-                      verbose = FALSE
-  )
-  logdet <- res$logdet
-  res <- inla.rerun(res)
-  res$mlik <- res$mlik + 0.5 * logdet
-  return(list(mlik = res$mlik[[1]],
-              dists = list(intercept = res$marginals.fixed[[1]],
-                           GDPCAP = res$marginals.fixed[[2]],
-                           tau = res$marginals.hyperpar[[1]]),
-              logdet = logdet))
-}
-
-
 calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   weight[1:i_tot] = exp(weight[1:i_tot] - max(weight[1:i_tot]))
   for (i in seq(ncol(eta))){
