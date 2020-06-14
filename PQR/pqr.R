@@ -35,7 +35,7 @@ gaussian_model <- function(params, n = 200){
   ))
 }
 
-init = list(mu = c(0,0),cov = 4*diag(2))
+init = list(mu = c(0,0),cov = 10*diag(2))
 
 
 # # M1 Gaussian 
@@ -134,7 +134,7 @@ prior.param <- function(x, log = TRUE) {
   sum(dnorm(x, 0, 100, log = log))
 }
 
-init = list(mu = c(0,0),cov = 5*diag(2))
+init = list(mu = c(0,0),cov = 10*diag(2))
 
 amis_w_inla_mod = amis.w.inla(data = lidar, init = init, prior.param,
                               dq.param, rq.param, fit.inla.rw2,
