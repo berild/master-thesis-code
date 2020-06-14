@@ -1,128 +1,208 @@
 library(ggplot2)
 
-load("./sims/toy-is-w-inla.Rdata")
-load("./sims/toy-inla.Rdata")
-load("./sims/toy-amis-w-inla.Rdata")
-load("./sims/toy-mcmc-w-inla.Rdata")
+load("./sims/toy/toy-is-w-inla.Rdata")
+load("./sims/toy/toy-inla.Rdata")
+load("./sims/toy/toy-amis-w-inla.Rdata")
+load("./sims/toy/toy-mcmc-w-inla.Rdata")
 source("./toy/general_functions.R")
 
-ggplot() + 
+
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+col_temp = gg_color_hue(4)
+
+p1 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$margs$intercept, aes(x=x,y=y, color = "AMIS with INLA")) + 
   geom_line(data = is_w_inla_mod$margs$intercept, aes(x=x,y=y, color = "IS with INLA")) +
   geom_line(data = mcmc_w_inla_mod$margs$intercept, aes(x=x,y=y, color = "MCMC with INLA")) +
-  labs(color = "", x = "",y="",title=expression(alpha),linetype = "")+
+  geom_line(data = data.frame(inla_mod$marginals.fixed$`(Intercept)`),aes(x=x,y=y,color = "INLA")) + 
+  geom_vline(data = data.frame(x = 1), aes(xintercept = 1, linetype = "Truth")) + 
+  scale_linetype_manual(values= "dotdash") + 
+  scale_color_manual(values = col_temp) + 
+  labs(color = "", x = expression(alpha),y="",linetype = "")+
   theme_bw() + 
+  coord_cartesian(xlim = c(-0.5,2.5))+
   theme(legend.position="bottom",plot.title = element_text(hjust = 0.5))
 
 
-ggplot() + 
+p2 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$margs$tau, aes(x=x,y=y, color = "AMIS with INLA")) + 
   geom_line(data = is_w_inla_mod$margs$tau, aes(x=x,y=y, color = "IS with INLA")) +
   geom_line(data = is_w_inla_mod$margs$tau, aes(x=x,y=y, color = "MCMC with INLA")) +
-  labs(color = "", x = "",y="",title=expression(tau),linetype = "")+
+  geom_line(data = data.frame(inla_mod$marginals.hyperpar$`Precision for the Gaussian observations`),aes(x=x,y=y,color = "INLA")) + 
+  geom_vline(data = data.frame(x = 1), aes(xintercept = 1, linetype = "Truth")) + 
+  labs(color = "", x = expression(tau),y="",linetype = "")+
+  scale_linetype_manual(values= "dotdash") + 
   theme_bw() + 
-  theme(legend.position="bottom",plot.title = element_text(hjust = 0.5))
+  scale_color_manual(values = col_temp) + 
+  coord_cartesian(xlim = c(0.3,2.5))+
+  theme(legend.position="bottom")
 
-amis_w_inla_mod$eta_uni_kerns = lapply(seq(ncol(amis_w_inla_mod$eta)), function(x){
-  as.data.frame(density(x = amis_w_inla_mod$eta[,x],
-                        weights = amis_w_inla_mod$weight/sum(amis_w_inla_mod$weight),
-                        kernel = "gaussian")[c(1,2)])
-})
-is_w_inla_mod$eta_uni_kerns= lapply(seq(ncol(is_w_inla_mod$eta)), function(x){
-  as.data.frame(density(x = is_w_inla_mod$eta[,x],
-                        weights = is_w_inla_mod$weight/sum(is_w_inla_mod$weight),
-                        kernel = "gaussian")[c(1,2)])
-})
-mcmc_w_inla_mod$eta_uni_kerns= lapply(seq(ncol(mcmc_w_inla_mod$eta)), function(x){
-  as.data.frame(density(x = mcmc_w_inla_mod$eta[,x],
-                        weights = rep(1/length(mcmc_w_inla_mod$eta[,x]),length(mcmc_w_inla_mod$eta[,x])),
-                        kernel = "gaussian")[c(1,2)])
-})
+# amis_w_inla_mod$eta_uni_kerns = lapply(seq(ncol(amis_w_inla_mod$eta)), function(x){
+#   as.data.frame(density(x = amis_w_inla_mod$eta[,x],
+#                         weights = amis_w_inla_mod$weight/sum(amis_w_inla_mod$weight),
+#                         kernel = "gaussian")[c(1,2)])
+# })
+# is_w_inla_mod$eta_uni_kerns= lapply(seq(ncol(is_w_inla_mod$eta)), function(x){
+#   as.data.frame(density(x = is_w_inla_mod$eta[,x],
+#                         weights = is_w_inla_mod$weight/sum(is_w_inla_mod$weight),
+#                         kernel = "gaussian")[c(1,2)])
+# })
+# mcmc_w_inla_mod$eta_uni_kerns= lapply(seq(ncol(mcmc_w_inla_mod$eta)), function(x){
+#   as.data.frame(density(x = mcmc_w_inla_mod$eta[,x],
+#                         weights = rep(1/length(mcmc_w_inla_mod$eta[,x]),length(mcmc_w_inla_mod$eta[,x])),
+#                         kernel = "gaussian")[c(1,2)])
+# })
+# 
+# eta_joint_kern_amis = kde2d.weighted(x = amis_w_inla_mod$eta[,1], y = amis_w_inla_mod$eta[,2], w = amis_w_inla_mod$weight/(sum(amis_w_inla_mod$weight)), n = 100, lims = c(0,2,-2,0))
+# eta_joint_kern_is = kde2d.weighted(x = is_w_inla_mod$eta[,1], y = is_w_inla_mod$eta[,2], w = is_w_inla_mod$weight/(sum(is_w_inla_mod$weight)), n = 100, lims = c(0,2,-2,0))
+# eta_joint_kern_mcmc = kde2d.weighted(x = mcmc_w_inla_mod$eta[,1], y = mcmc_w_inla_mod$eta[,2], w = rep(1/length(mcmc_w_inla_mod$eta[,1]),length(mcmc_w_inla_mod$eta[,1])), n = 100, lims = c(0,2,-2,0))
+# amis_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_amis$x, y=eta_joint_kern_amis$y), z=as.vector(eta_joint_kern_amis$z))
+# is_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_is$x, y=eta_joint_kern_is$y), z=as.vector(eta_joint_kern_is$z))
+# mcmc_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_mcmc$x, y=eta_joint_kern_mcmc$y), z=as.vector(eta_joint_kern_mcmc$z))
+# 
+# amis_w_inla_mod$ess = running.ESS(amis_w_inla_mod$eta, amis_w_inla_mod$times,ws =  amis_w_inla_mod$weight, norm = F)
+# save(amis_w_inla_mod,file="./sims/toy/toy-amis-w-inla.Rdata")
+# is_w_inla_mod$ess = running.ESS(is_w_inla_mod$eta, is_w_inla_mod$times,ws =  is_w_inla_mod$weight, norm = F)
+# save(is_w_inla_mod,file="./sims/toy/toy-is-w-inla.Rdata")
+# mcmc_w_inla_mod$ess = running.ESS(mcmc_w_inla_mod$eta, mcmc_w_inla_mod$times, norm = F)
+# save(mcmc_w_inla_mod,file="./sims/toy/toy-mcmc-w-inla.Rdata")
 
-eta_joint_kern_amis = kde2d.weighted(x = amis_w_inla_mod$eta[,1], y = amis_w_inla_mod$eta[,2], w = amis_w_inla_mod$weight/(sum(amis_w_inla_mod$weight)), n = 100, lims = c(0,2,-2,0))
-eta_joint_kern_is = kde2d.weighted(x = is_w_inla_mod$eta[,1], y = is_w_inla_mod$eta[,2], w = is_w_inla_mod$weight/(sum(is_w_inla_mod$weight)), n = 100, lims = c(0,2,-2,0))
-eta_joint_kern_mcmc = kde2d.weighted(x = mcmc_w_inla_mod$eta[,1], y = mcmc_w_inla_mod$eta[,2], w = rep(1/length(mcmc_w_inla_mod$eta[,1]),length(mcmc_w_inla_mod$eta[,1])), n = 100, lims = c(0,2,-2,0))
-amis_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_amis$x, y=eta_joint_kern_amis$y), z=as.vector(eta_joint_kern_amis$z))
-is_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_is$x, y=eta_joint_kern_is$y), z=as.vector(eta_joint_kern_is$z))
-mcmc_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_mcmc$x, y=eta_joint_kern_mcmc$y), z=as.vector(eta_joint_kern_mcmc$z))
 
-ggplot() + 
+p3 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,color="AMIS with INLA")) +
   geom_line(data = is_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,color="IS with INLA")) +
   geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,color="MCMC with INLA")) + 
   geom_line(data = data.frame(inla_mod$marginals.fixed$x1),aes(x=x,y=y,color = "INLA")) + 
   geom_vline(data = data.frame(x = 1), aes(xintercept = 1, linetype = "Truth")) + 
   scale_linetype_manual(values= "dotdash") + 
-  labs(color = "", x = "",y="",title=expression(beta[1]),linetype = "") + 
+  labs(color = "", x = expression(beta[1]),y="",linetype = "") + 
+  scale_color_manual(values =col_temp) + 
   coord_cartesian(xlim = c(-0.5,2.5))+
   theme_bw() + 
-  theme(legend.position="bottom",plot.title = element_text(hjust = 0.5))
+  theme(legend.position="bottom")
 
-ggplot() + 
+p4 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,color="AMIS with INLA")) +
   geom_line(data = is_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,color="IS with INLA")) +
   geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,color="MCMC with INLA")) +
-  labs(color = "", x = "",y="",title=expression(delta^(2)),linetype = "")+
   geom_line(data = data.frame(inla_mod$marginals.fixed$x2),aes(x=x,y=y,color = "INLA")) + 
   geom_vline(data = data.frame(x = 1), aes(xintercept = -1, linetype = "Truth")) + 
   scale_linetype_manual(values= "dotdash") + 
-  labs(color = "", x = "",y="",title=expression(beta[2]),linetype = "") + 
+  labs(color = "", x = expression(beta[2]),y="",linetype = "") + 
+  scale_color_manual(values = col_temp) + 
   coord_cartesian(xlim = c(-2.5,0.5))+
   theme_bw() + 
-  theme(legend.position="bottom",plot.title = element_text(hjust = 0.5))
+  theme(legend.position="bottom")
+p4
 
-ggplot() + 
+ggarrange(p1,p2,p3,p4,ncol=2, nrow=2, common.legend = T,legend="bottom")
+
+
+cont1 <- ggplot() + 
   geom_contour(data = amis_w_inla_mod$eta_joint_kern, aes(x = x, y = y, z = z, color = "AMIS with INLA"),bins = 6) +
-  geom_contour(data = is_w_inla_mod$eta_joint_kern, aes(x = x, y = y, z = z, color = "IS with INLA"),bins = 6) +
-  geom_contour(data = mcmc_w_inla_mod$eta_joint_kern, aes(x = x, y = y, z = z, color = "MCMC with INLA"),bins = 6) +
-  labs(color = "",x=expression(delta^(1)),y=expression(delta^(2)),linetype="") +
+  geom_contour(data = is_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, color = "IS with INLA"),bins = 6) +
+  geom_contour(data = mcmc_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, color = "MCMC with INLA"),bins = 6) +
+  labs(color = "",x=expression(beta[1]),y=expression(beta[2]),linetype="") +
   theme_bw() +
+  scale_color_manual(values = col_temp) + 
   coord_cartesian(xlim = c(0,2),ylim=c(-2,0)) + 
   theme(legend.position="bottom")
+cont1
+
+cont2 <- ggplot() + 
+  geom_contour(data = amis_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, color = "AMIS with INLA"),bins = 6) +
+  geom_contour(data = is_w_inla_mod$eta_joint_kern, aes(x = x, y = y, z = z, color = "IS with INLA"),bins = 6) +
+  geom_contour(data = mcmc_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, color = "MCMC with INLA"),bins = 6) +
+  labs(color = "",x=expression(beta[1]),y=expression(beta[2]),linetype="") +
+  theme_bw() +
+  scale_color_manual(values = col_temp) + 
+  coord_cartesian(xlim = c(0,2),ylim=c(-2,0)) + 
+  theme(legend.position="bottom")
+cont2
+
+cont3 <- ggplot() + 
+  geom_contour(data = amis_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, color = "AMIS with INLA"),bins = 6) +
+  geom_contour(data = is_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, color = "IS with INLA"),bins = 6) +
+  geom_contour(data = mcmc_w_inla_mod$eta_joint_kern, aes(x = x, y = y, z = z, color = "MCMC with INLA"),bins = 6) +
+  labs(color = "",x=expression(beta[1]),y=expression(beta[2]),linetype="") +
+  theme_bw() +
+  scale_color_manual(values = col_temp) + 
+  coord_cartesian(xlim = c(0,2),ylim=c(-2,0)) + 
+  theme(legend.position="bottom")
+cont3
+
+essp <- ggplot() + 
+  geom_line(data = amis_w_inla_mod$ess,aes(x=time,y=ess,color = "AMIS with INLA")) +
+  geom_line(data = is_w_inla_mod$ess,aes(x=time,y=ess,color = "IS with INLA")) +
+  geom_line(data = mcmc_w_inla_mod$ess,aes(x=time,y=ess,color = "MCMC with INLA")) +
+  scale_x_continuous(labels = c("0 sec", "1 min", "5 min", "20 min", "1 h"),trans="log",breaks=c(0,60,60*5,60*20,60*60)) + 
+  labs(color = "",x="Runtime",y="ESS") +
+  theme_bw() + 
+  coord_cartesian(xlim = c(10,60*70)) + 
+  scale_color_manual(values = col_temp) + 
+  theme(legend.position="bottom")
+essp
+
+ggarrange(cont1,cont2,cont3,essp,ncol=2, nrow=2, common.legend = T,legend="bottom")
 
 
-ggplot() + 
+p1mcmc <- ggplot() + 
   geom_polygon(data = data.frame(x = inla_mod$marginals.fixed$x1[,1], 
-                                 y = 10500+inla_mod$marginals.fixed$x1[,2]/max(inla_mod$marginals.fixed$x1[,2])*2000), aes(x=y,y=x,fill = "target"),alpha = 0.3) +
-  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$full_eta[,1])), y = mcmc_w_inla_mod$full_eta[,1]),aes(x=x,y=y)) + 
+                                 y = 10500+inla_mod$marginals.fixed$x1[,2]/max(inla_mod$marginals.fixed$x1[,2])*2000), aes(x=y,y=x,fill = "target")) +
+  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$full_eta[1:500,1])), y = mcmc_w_inla_mod$full_eta[1:500,1]),aes(x=x,y=y),alpha=0.4) + 
+  geom_path(data = data.frame(x = seq(501,500+length(mcmc_w_inla_mod$eta[,1])), y = mcmc_w_inla_mod$eta[,1]),aes(x=x,y=y)) + 
   geom_path(data = data.frame(x = mcmc_w_inla_mod$eta_uni_kerns[[1]]$x,
                                  y = 10500+ mcmc_w_inla_mod$eta_uni_kerns[[1]]$y/max(mcmc_w_inla_mod$eta_uni_kerns[[1]]$y)*2000),aes(x=y,y=x,color = "estimate"))+
-  scale_color_manual(values = "blue") + 
-  scale_fill_manual(values = "red") + 
-  labs(color = "",fill = "") + 
+  scale_color_manual(values = col_temp[1]) + 
+  scale_fill_manual(values = col_temp[3]) + 
+  labs(x = "N",y = expression(beta[1]),color="",fill="") +
+  coord_cartesian(ylim = c(-0.5,2.5)) + 
   theme_bw()
+p1mcmc
 
-ggplot() + 
+p2mcmc <- ggplot() + 
   geom_polygon(data = data.frame(x = inla_mod$marginals.fixed$x2[,1], 
-                                 y = 10500+inla_mod$marginals.fixed$x2[,2]/max(inla_mod$marginals.fixed$x2[,2])*2000), aes(x=y,y=x,fill = "target"),alpha = 0.3) +
-  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$full_eta[,2])), y = mcmc_w_inla_mod$full_eta[,2]),aes(x=x,y=y)) + 
+                                 y = 10500+inla_mod$marginals.fixed$x2[,2]/max(inla_mod$marginals.fixed$x2[,2])*2000), aes(x=y,y=x,fill = "target")) +
+  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$full_eta[1:500,2])), y = mcmc_w_inla_mod$full_eta[1:500,2]),aes(x=x,y=y),alpha = 0.4) + 
+  geom_path(data = data.frame(x = seq(501,500 + length(mcmc_w_inla_mod$eta[,2])), y = mcmc_w_inla_mod$eta[,2]),aes(x=x,y=y)) + 
   geom_path(data = data.frame(x = mcmc_w_inla_mod$eta_uni_kerns[[2]]$x,
                               y = 10500+ mcmc_w_inla_mod$eta_uni_kerns[[2]]$y/max(mcmc_w_inla_mod$eta_uni_kerns[[2]]$y)*2000),aes(x=y,y=x,color = "estimate"))+
-  scale_color_manual(values = "blue") + 
-  scale_fill_manual(values = "red") + 
+  scale_color_manual(values = col_temp[1]) + 
+  scale_fill_manual(values = col_temp[3]) + 
   labs(color = "",fill = "") + 
+  labs(x = "N",y = expression(beta[2]),color="",fill="") +
+  coord_cartesian(ylim = c(-2.5,0.5)) + 
   theme_bw()
+p2mcmc
 
-amis_adaptive = lapply(c(1,2,5,10,15,20,28), function(x){
-  tmp = rnorm(500,amis_w_inla_mod$theta$a.mu[x,1],sqrt(amis_w_inla_mod$theta$a.cov[1,1,x]))
+ggarrange(p1mcmc,p2mcmc,ncol=2, nrow=1, common.legend = T,legend="bottom")
+
+T_s = c(1,2,5,10,15,20,28)
+amis_adaptive = lapply(seq(7), function(x){
+  tmp = rnorm(500,amis_w_inla_mod$theta$a.mu[T_s[x],1],sqrt(amis_w_inla_mod$theta$a.cov[1,1,T_s[x]]))
   tmp = sort(tmp)
-  y = dnorm(tmp,amis_w_inla_mod$theta$a.mu[x,1],sqrt(amis_w_inla_mod$theta$a.cov[1,1,x]))
-  tmp2 = c(0,250, seq(25,50)*10,10*51)
-  tmp3 = c(1,2,5,10,15,20,28,29)
-  y = sum(tmp2[1:x]) + y/max(y)*sum(tmp2[(x+1):(tmp3[which(tmp3 == x)+1])])
+  y = dnorm(tmp,amis_w_inla_mod$theta$a.mu[T_s[x],1],sqrt(amis_w_inla_mod$theta$a.cov[1,1,T_s[x]]))
+  y = y/max(y) + x
   data.frame(x=tmp,y=y)
 })
-amis_adaptive2 = lapply(c(1,2,5,10,15,20,28), function(x){
-  idx = which(x == T_s)
+amis_adaptive2 = lapply(seq(7), function(x){
   tmp = inla_mod$marginals.fixed$x1[,1]
   y = inla_mod$marginals.fixed$x1[,2]
-  tmp2 = c(0,250, seq(25,50)*10,10*51)
-  tmp3 = c(1,2,5,10,15,20,28,29)
-  y = sum(tmp2[1:x]) + y/max(y)*sum(tmp2[(x+1):(tmp3[which(tmp3 == x)+1])])
+  y = y/max(y) +x
   data.frame(x=tmp,y=y)
 })
 
-ggplot() + 
+p1amis <- ggplot() + 
+  geom_polygon(data = amis_adaptive2[[1]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = amis_adaptive2[[2]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = amis_adaptive2[[3]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = amis_adaptive2[[4]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = amis_adaptive2[[5]],aes(x=y,y=x,fill = "target")) +
+  geom_polygon(data = amis_adaptive2[[6]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = amis_adaptive2[[7]],aes(x=y,y=x,fill = "target")) + 
   geom_path(data = amis_adaptive[[1]],aes(x=y,y=x, color = "proposal")) + 
   geom_path(data = amis_adaptive[[2]],aes(x=y,y=x, color = "proposal")) + 
   geom_path(data = amis_adaptive[[3]],aes(x=y,y=x, color = "proposal")) + 
@@ -130,40 +210,102 @@ ggplot() +
   geom_path(data = amis_adaptive[[5]],aes(x=y,y=x, color = "proposal")) + 
   geom_path(data = amis_adaptive[[6]],aes(x=y,y=x, color = "proposal")) + 
   geom_path(data = amis_adaptive[[7]],aes(x=y,y=x, color = "proposal")) + 
-  geom_polygon(data = amis_adaptive2[[1]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[2]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[3]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[4]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[5]],aes(x=y,y=x,fill = "target"), alpha = 0.5) +
-  geom_polygon(data = amis_adaptive2[[6]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[7]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  scale_color_manual(values = "red") + 
-  scale_fill_manual(values = "blue") + 
-  labs(color="",fill="") +
-  theme_bw()
-  
+  scale_color_manual(values = col_temp[1]) + 
+  scale_fill_manual(values = col_temp[3]) + 
+  scale_x_continuous(label = T_s, breaks = seq(7)) + 
+  labs(x = "T",y = expression(beta[1]),color="",fill="",title="AMIS with INLA") +
+  theme_bw() + 
+  theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
+p1amis
+
+amis_adaptive21 = lapply(seq(7), function(x){
+  tmp = rnorm(500,amis_w_inla_mod$theta$a.mu[T_s[x],2],sqrt(amis_w_inla_mod$theta$a.cov[2,2,T_s[x]]))
+  tmp = sort(tmp)
+  y = dnorm(tmp,amis_w_inla_mod$theta$a.mu[T_s[x],2],sqrt(amis_w_inla_mod$theta$a.cov[2,2,T_s[x]]))
+  y = y/max(y) + x
+  data.frame(x=tmp,y=y)
+})
+amis_adaptive22 = lapply(seq(7), function(x){
+  tmp = inla_mod$marginals.fixed$x2[,1]
+  y = inla_mod$marginals.fixed$x2[,2]
+  y = y/max(y) +x
+  data.frame(x=tmp,y=y)
+})
+
+p2amis <-ggplot() + 
+  geom_polygon(data = amis_adaptive22[[1]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = amis_adaptive22[[2]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = amis_adaptive22[[3]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = amis_adaptive22[[4]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = amis_adaptive22[[5]],aes(x=y,y=x,fill = "target")) +
+  geom_polygon(data = amis_adaptive22[[6]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = amis_adaptive22[[7]],aes(x=y,y=x,fill = "target")) + 
+  geom_path(data = amis_adaptive21[[1]],aes(x=y,y=x, color = "proposal")) + 
+  geom_path(data = amis_adaptive21[[2]],aes(x=y,y=x, color = "proposal")) + 
+  geom_path(data = amis_adaptive21[[3]],aes(x=y,y=x, color = "proposal")) + 
+  geom_path(data = amis_adaptive21[[4]],aes(x=y,y=x, color = "proposal")) + 
+  geom_path(data = amis_adaptive21[[5]],aes(x=y,y=x, color = "proposal")) + 
+  geom_path(data = amis_adaptive21[[6]],aes(x=y,y=x, color = "proposal")) + 
+  geom_path(data = amis_adaptive21[[7]],aes(x=y,y=x, color = "proposal")) +
+  scale_color_manual(values = col_temp[1]) + 
+  scale_fill_manual(values = col_temp[3]) + 
+  scale_x_continuous(label = T_s, breaks = seq(7)) + 
+  labs(x = "T",y = expression(beta[2]),color="",fill="",title="AMIS with INLA") +
+  theme_bw() + 
+  theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
+p2amis
 
 is_adaptive = lapply(seq(2), function(x){
-  tmp2 = c(0,800,10000)
   tmp = rnorm(500,is_w_inla_mod$theta$a.mu[x,1],sqrt(is_w_inla_mod$theta$a.cov[1,1,x]))
   tmp = sort(tmp)
   y = dnorm(tmp,is_w_inla_mod$theta$a.mu[x,1],sqrt(is_w_inla_mod$theta$a.cov[1,1,x]))
-  y = sum(tmp2[1:x]) + y/max(y)*tmp2[x+1]
+  y = x + y/max(y)
   data.frame(x=tmp,y=y)
 })
 is_adaptive2 = lapply(seq(2), function(x){
-  tmp2 = c(0,500,10000)
   tmp = inla_mod$marginals.fixed$x1[,1]
   y = inla_mod$marginals.fixed$x1[,2]
-  y = sum(tmp2[1:x]) + y/max(y)*tmp2[x+1]
+  y = x + y/max(y)
   data.frame(x=tmp,y=y)
 })
-ggplot() + 
-  geom_path(data = amis_adaptive[[1]],aes(x=y,y=x, color = "proposal")) + 
-  geom_path(data = amis_adaptive[[2]],aes(x=y,y=x, color = "proposal")) + 
-  geom_polygon(data = amis_adaptive2[[1]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  geom_polygon(data = amis_adaptive2[[2]],aes(x=y,y=x,fill = "target"), alpha = 0.5) + 
-  scale_color_manual(values = "red") + 
-  scale_fill_manual(values = "blue") + 
-  labs(color="",fill="") +
-  theme_bw()
+p1is <-ggplot() + 
+  geom_polygon(data = is_adaptive2[[1]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = is_adaptive2[[2]],aes(x=y,y=x,fill = "target")) + 
+  geom_path(data = is_adaptive[[1]],aes(x=y,y=x, color = "proposal")) + 
+  geom_path(data = is_adaptive[[2]],aes(x=y,y=x, color = "proposal")) + 
+  scale_color_manual(values = col_temp[1]) + 
+  scale_fill_manual(values = col_temp[3]) + 
+  scale_x_continuous(label = seq(2), breaks = seq(2)) + 
+  labs(color="",fill="",x="T",y = expression(beta[1]),title="IS with INLA") +
+  theme_bw()+
+  theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
+p1is
+
+is_adaptive21 = lapply(seq(2), function(x){
+  tmp = rnorm(500,is_w_inla_mod$theta$a.mu[x,2],sqrt(is_w_inla_mod$theta$a.cov[2,2,x]))
+  tmp = sort(tmp)
+  y = dnorm(tmp,is_w_inla_mod$theta$a.mu[x,2],sqrt(is_w_inla_mod$theta$a.cov[2,2,x]))
+  y = x + y/max(y)
+  data.frame(x=tmp,y=y)
+})
+is_adaptive22 = lapply(seq(2), function(x){
+  tmp = inla_mod$marginals.fixed$x2[,1]
+  y = inla_mod$marginals.fixed$x2[,2]
+  y = x + y/max(y)
+  data.frame(x=tmp,y=y)
+})
+
+p2is <-ggplot() + 
+  geom_polygon(data = is_adaptive22[[1]],aes(x=y,y=x,fill = "target")) + 
+  geom_polygon(data = is_adaptive22[[2]],aes(x=y,y=x,fill = "target")) + 
+  geom_path(data = is_adaptive21[[1]],aes(x=y,y=x, color = "proposal")) + 
+  geom_path(data = is_adaptive21[[2]],aes(x=y,y=x, color = "proposal")) + 
+  scale_color_manual(values = col_temp[1]) + 
+  scale_fill_manual(values = col_temp[3]) + 
+  scale_x_continuous(label = seq(2), breaks = seq(2)) + 
+  labs(color="",fill="",x="T",y = expression(beta[2]),title="IS with INLA") +
+  theme_bw()+ 
+  theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
+p2is
+
+ggarrange(p1amis,p2amis,p1is,p2is,ncol=2, nrow=2, common.legend = T,legend="bottom")
