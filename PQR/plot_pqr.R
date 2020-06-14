@@ -104,7 +104,7 @@ p3 <- ggplot() +
   geom_point(data = as.data.frame(amis_w_inla_mod$mod$data),aes(x=x,y=y),alpha=0.5) + 
   geom_text(data = pqr_text, aes(x=x,y=y,label=text)) + 
   annotate("text",label=paste("M1 Gamma \n","a =", amis_w_inla_mod$mod$params$a,"   b =", amis_w_inla_mod$mod$params$b,"   c =",amis_w_inla_mod$mod$params$c,
-                              "   d =",amis_w_inla_mod$mod$params$d),x = 0.5, y = 0.45) + 
+                              "   d =",amis_w_inla_mod$mod$params$d),x = 0.5, y = 80) + 
   scale_linetype_manual(values = c("solid","solid","solid","solid","solid")) + 
   labs(color="",linetype="",x="",y="") + 
   scale_color_manual(values = col_temp) + 
@@ -118,7 +118,7 @@ load("./sims/pqr-m2-gamma-is-w-inla.Rdata")
 pqr_text <- create_pqr_text(amis_w_inla_mod$pqr,1)
 p4 <- ggplot() + 
   geom_line(data= amis_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="AMIS with INLA")) + 
-  geom_line(data= is_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="IS with INLA")) + 
+  #geom_line(data= is_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="IS with INLA")) + 
   geom_line(data = amis_w_inla_mod$pqr_truth,aes(x=x,y=y,linetype = quants,color="Truth")) + 
   geom_point(data = as.data.frame(amis_w_inla_mod$mod$data),aes(x=x,y=y),alpha=0.5) + 
   geom_text(data = pqr_text, aes(x=x,y=y,label=text)) + 
@@ -130,6 +130,8 @@ p4 <- ggplot() +
   guides(linetype = F) + 
   theme_bw()
 p4
+
+library(ggpubr)
 
 ggarrange(p1,p2,p3,p4,ncol=2, nrow=2, common.legend = T,legend="bottom")
 
