@@ -137,12 +137,16 @@ pqr_truth_lines <- function(data,params,type){
   return(res[-1,])
 }
 
-pqr_inla <- function(data,margs,eta_kern,type){
+pqr_inla <- function(data,margs,eta_kern,type,domain = NA){
+  tmpx = data$x
   quants = c(0.1,0.25,0.5,0.75,0.9)
   params = c(sapply(margs, function(x){x$x[which.max(x$y)]}),
              sapply(eta_kern, function(x){x$x[which.max(x$y)]}))
-  mu = params[1] + params[2]*data$x
-  tau = exp(params[3] + params[4]*data$x)
+  if (!anyNA(domain)){
+    tmpx = seq(domain[1],domain[2],length.out = 500)
+  }
+  mu = params[1] + params[2]*tmpx
+  tau = exp(params[3] + params[4]*tmpx)
   res = data.frame(x = NA, y = NA, quants = NA)
   for (i in seq(length(quants))){
     if (type == "gaussian"){
@@ -150,7 +154,7 @@ pqr_inla <- function(data,margs,eta_kern,type){
     }else if (type == "gamma"){
       tmpy = exp(mu)*qgamma(quants[i], shape = tau, scale = 1)/tau 
     }
-    res = rbind(res,data.frame(x = data$x, y = tmpy, quants = rep(toString(quants[i]),length(data$x))))
+    res = rbind(res,data.frame(x = tmpx, y = tmpy, quants = rep(toString(quants[i]),length(tmpx))))
   }
   return(res[-1,])
 }
