@@ -1,5 +1,5 @@
 library(ggplot2)
-
+library(ggpubr)
 load("./sims/toy/toy-is-w-inla.Rdata")
 load("./sims/toy/toy-inla.Rdata")
 load("./sims/toy/toy-amis-w-inla.Rdata")
@@ -21,11 +21,11 @@ p1 <- ggplot() +
   geom_vline(data = data.frame(x = 1), aes(xintercept = 1, linetype = "Truth")) + 
   scale_linetype_manual(values= "dotdash") + 
   scale_color_manual(values = col_temp) + 
-  labs(color = "", x = expression(alpha),y="",linetype = "")+
+  labs(color = "", x = expression(beta[0]),y="",linetype = "")+
   theme_bw() + 
   coord_cartesian(xlim = c(-0.5,2.5))+
   theme(legend.position="bottom",plot.title = element_text(hjust = 0.5))
-
+p1
 
 p2 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$margs$tau, aes(x=x,y=y, color = "AMIS with INLA")) + 
@@ -39,36 +39,37 @@ p2 <- ggplot() +
   scale_color_manual(values = col_temp) + 
   coord_cartesian(xlim = c(0.3,2.5))+
   theme(legend.position="bottom")
+p2
 
-# amis_w_inla_mod$eta_uni_kerns = lapply(seq(ncol(amis_w_inla_mod$eta)), function(x){
-#   as.data.frame(density(x = amis_w_inla_mod$eta[,x],
-#                         weights = amis_w_inla_mod$weight/sum(amis_w_inla_mod$weight),
-#                         kernel = "gaussian")[c(1,2)])
-# })
-# is_w_inla_mod$eta_uni_kerns= lapply(seq(ncol(is_w_inla_mod$eta)), function(x){
-#   as.data.frame(density(x = is_w_inla_mod$eta[,x],
-#                         weights = is_w_inla_mod$weight/sum(is_w_inla_mod$weight),
-#                         kernel = "gaussian")[c(1,2)])
-# })
-# mcmc_w_inla_mod$eta_uni_kerns= lapply(seq(ncol(mcmc_w_inla_mod$eta)), function(x){
-#   as.data.frame(density(x = mcmc_w_inla_mod$eta[,x],
-#                         weights = rep(1/length(mcmc_w_inla_mod$eta[,x]),length(mcmc_w_inla_mod$eta[,x])),
-#                         kernel = "gaussian")[c(1,2)])
-# })
-# 
-# eta_joint_kern_amis = kde2d.weighted(x = amis_w_inla_mod$eta[,1], y = amis_w_inla_mod$eta[,2], w = amis_w_inla_mod$weight/(sum(amis_w_inla_mod$weight)), n = 100, lims = c(0,2,-2,0))
-# eta_joint_kern_is = kde2d.weighted(x = is_w_inla_mod$eta[,1], y = is_w_inla_mod$eta[,2], w = is_w_inla_mod$weight/(sum(is_w_inla_mod$weight)), n = 100, lims = c(0,2,-2,0))
-# eta_joint_kern_mcmc = kde2d.weighted(x = mcmc_w_inla_mod$eta[,1], y = mcmc_w_inla_mod$eta[,2], w = rep(1/length(mcmc_w_inla_mod$eta[,1]),length(mcmc_w_inla_mod$eta[,1])), n = 100, lims = c(0,2,-2,0))
-# amis_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_amis$x, y=eta_joint_kern_amis$y), z=as.vector(eta_joint_kern_amis$z))
-# is_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_is$x, y=eta_joint_kern_is$y), z=as.vector(eta_joint_kern_is$z))
-# mcmc_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_mcmc$x, y=eta_joint_kern_mcmc$y), z=as.vector(eta_joint_kern_mcmc$z))
-# 
-# amis_w_inla_mod$ess = running.ESS(amis_w_inla_mod$eta, amis_w_inla_mod$times,ws =  amis_w_inla_mod$weight, norm = F)
-# save(amis_w_inla_mod,file="./sims/toy/toy-amis-w-inla.Rdata")
-# is_w_inla_mod$ess = running.ESS(is_w_inla_mod$eta, is_w_inla_mod$times,ws =  is_w_inla_mod$weight, norm = F)
-# save(is_w_inla_mod,file="./sims/toy/toy-is-w-inla.Rdata")
-# mcmc_w_inla_mod$ess = running.ESS(mcmc_w_inla_mod$eta, mcmc_w_inla_mod$times, norm = F)
-# save(mcmc_w_inla_mod,file="./sims/toy/toy-mcmc-w-inla.Rdata")
+amis_w_inla_mod$eta_uni_kerns = lapply(seq(ncol(amis_w_inla_mod$eta)), function(x){
+  as.data.frame(density(x = amis_w_inla_mod$eta[,x],
+                        weights = amis_w_inla_mod$weight/sum(amis_w_inla_mod$weight),
+                        kernel = "gaussian")[c(1,2)])
+})
+is_w_inla_mod$eta_uni_kerns= lapply(seq(ncol(is_w_inla_mod$eta)), function(x){
+  as.data.frame(density(x = is_w_inla_mod$eta[,x],
+                        weights = is_w_inla_mod$weight/sum(is_w_inla_mod$weight),
+                        kernel = "gaussian")[c(1,2)])
+})
+mcmc_w_inla_mod$eta_uni_kerns= lapply(seq(ncol(mcmc_w_inla_mod$eta)), function(x){
+  as.data.frame(density(x = mcmc_w_inla_mod$eta[,x],
+                        weights = rep(1/length(mcmc_w_inla_mod$eta[,x]),length(mcmc_w_inla_mod$eta[,x])),
+                        kernel = "gaussian")[c(1,2)])
+})
+
+eta_joint_kern_amis = kde2d.weighted(x = amis_w_inla_mod$eta[,1], y = amis_w_inla_mod$eta[,2], w = amis_w_inla_mod$weight/(sum(amis_w_inla_mod$weight)), n = 100, lims = c(0,2,-2,0))
+eta_joint_kern_is = kde2d.weighted(x = is_w_inla_mod$eta[,1], y = is_w_inla_mod$eta[,2], w = is_w_inla_mod$weight/(sum(is_w_inla_mod$weight)), n = 100, lims = c(0,2,-2,0))
+eta_joint_kern_mcmc = kde2d.weighted(x = mcmc_w_inla_mod$eta[,1], y = mcmc_w_inla_mod$eta[,2], w = rep(1/length(mcmc_w_inla_mod$eta[,1]),length(mcmc_w_inla_mod$eta[,1])), n = 100, lims = c(0,2,-2,0))
+amis_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_amis$x, y=eta_joint_kern_amis$y), z=as.vector(eta_joint_kern_amis$z))
+is_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_is$x, y=eta_joint_kern_is$y), z=as.vector(eta_joint_kern_is$z))
+mcmc_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_mcmc$x, y=eta_joint_kern_mcmc$y), z=as.vector(eta_joint_kern_mcmc$z))
+
+amis_w_inla_mod$ess = running.ESS(amis_w_inla_mod$eta, amis_w_inla_mod$times,ws =  amis_w_inla_mod$weight, norm = F)
+save(amis_w_inla_mod,file="./sims/toy/toy-amis-w-inla.Rdata")
+is_w_inla_mod$ess = running.ESS(is_w_inla_mod$eta, is_w_inla_mod$times,ws =  is_w_inla_mod$weight, norm = F)
+save(is_w_inla_mod,file="./sims/toy/toy-is-w-inla.Rdata")
+mcmc_w_inla_mod$ess = running.ESS(mcmc_w_inla_mod$eta, mcmc_w_inla_mod$times, norm = F)
+save(mcmc_w_inla_mod,file="./sims/toy/toy-mcmc-w-inla.Rdata")
 
 
 p3 <- ggplot() + 
@@ -83,7 +84,7 @@ p3 <- ggplot() +
   coord_cartesian(xlim = c(-0.5,2.5))+
   theme_bw() + 
   theme(legend.position="bottom")
-
+p3
 p4 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,color="AMIS with INLA")) +
   geom_line(data = is_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,color="IS with INLA")) +
@@ -118,7 +119,7 @@ cont2 <- ggplot() +
   geom_contour(data = mcmc_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, color = "MCMC with INLA"),bins = 6) +
   labs(color = "",x=expression(beta[1]),y=expression(beta[2]),linetype="") +
   theme_bw() +
-  scale_color_manual(values = col_temp) + 
+  scale_color_manual(values = col_temp[-2]) + 
   coord_cartesian(xlim = c(0,2),ylim=c(-2,0)) + 
   theme(legend.position="bottom")
 cont2
@@ -129,7 +130,7 @@ cont3 <- ggplot() +
   geom_contour(data = mcmc_w_inla_mod$eta_joint_kern, aes(x = x, y = y, z = z, color = "MCMC with INLA"),bins = 6) +
   labs(color = "",x=expression(beta[1]),y=expression(beta[2]),linetype="") +
   theme_bw() +
-  scale_color_manual(values = col_temp) + 
+  scale_color_manual(values = col_temp[-2]) + 
   coord_cartesian(xlim = c(0,2),ylim=c(-2,0)) + 
   theme(legend.position="bottom")
 cont3
@@ -142,7 +143,7 @@ essp <- ggplot() +
   labs(color = "",x="Runtime",y="ESS") +
   theme_bw() + 
   coord_cartesian(xlim = c(10,60*70)) + 
-  scale_color_manual(values = col_temp) + 
+  scale_color_manual(values = col_temp[-2]) + 
   theme(legend.position="bottom")
 essp
 
