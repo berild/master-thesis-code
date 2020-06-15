@@ -9,7 +9,7 @@ col_temp = gg_color_hue(4)
 
 p1 <- ggplot() + 
   geom_line(data = as.data.frame(amis_w_inla_mod$margs$a), aes(x=x,y=y, color = "AMIS with INLA")) + 
-  geom_line(data = as.data.frame(is_w_inla_mod$margs$a),aes(x=x,y=y,color="IS with INLA")) + 
+  #geom_line(data = as.data.frame(is_w_inla_mod$margs$a),aes(x=x,y=y,color="IS with INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$mod$params$a) + 
   labs(color = "",x="a",y="") + 
   scale_color_manual(values = col_temp) + 
@@ -18,7 +18,7 @@ p1
 
 p2 <- ggplot() + 
   geom_line(data = as.data.frame(amis_w_inla_mod$margs$b), aes(x=x,y=y, color = "AMIS with INLA")) + 
-  geom_line(data = as.data.frame(is_w_inla_mod$margs$b),aes(x=x,y=y,color="IS with INLA")) + 
+  #geom_line(data = as.data.frame(is_w_inla_mod$margs$b),aes(x=x,y=y,color="IS with INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$mod$params$b) + 
   labs(color = "",x="b",y="") + 
   scale_color_manual(values = col_temp) + 
@@ -26,7 +26,7 @@ p2 <- ggplot() +
 p2
 p3 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="AMIS with INLA")) + 
-  geom_line(data = is_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="IS with INLA")) + 
+  #geom_line(data = is_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="IS with INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$mod$params$c) + 
   labs(color = "",x = "c",y="") + 
   scale_color_manual(values = col_temp) + 
@@ -34,7 +34,7 @@ p3 <- ggplot() +
 p3
 p4 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="AMIS with INLA")) + 
-  geom_line(data = is_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="IS with INLA")) + 
+  #geom_line(data = is_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="IS with INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$mod$params$d) + 
   labs(color = "",x = "d",y ="") + 
   scale_color_manual(values = col_temp) + 
@@ -59,16 +59,16 @@ create_pqr_text <- function(pqr,type=1){
 }
 
 load("./sims/pqr/pqr-m1-gaussian-amis-w-inla.Rdata")
-load("./sims/pqr/pqr-m1-gaussian-is-w-inla.Rdata")
+#load("./sims/pqr/pqr-m1-gaussian-is-w-inla.Rdata")
 pqr_text <- create_pqr_text(amis_w_inla_mod$pqr,1)
 p1 <- ggplot() + 
   geom_line(data= amis_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="AMIS with INLA")) + 
-  geom_line(data= is_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="IS with INLA")) + 
+  #geom_line(data= is_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="IS with INLA")) + 
   geom_line(data = amis_w_inla_mod$pqr_truth,aes(x=x,y=y,linetype = quants,color="Truth")) + 
   geom_point(data = as.data.frame(amis_w_inla_mod$mod$data),aes(x=x,y=y),alpha=0.2) + 
   geom_text(data = pqr_text, aes(x=x,y=y,label=text)) + 
   annotate("text",label=paste("M1 Gaussian \n","a =", amis_w_inla_mod$mod$params$a,"   b =", amis_w_inla_mod$mod$params$b,"   c =",amis_w_inla_mod$mod$params$c,
-                              "   d =",amis_w_inla_mod$mod$params$d),x = 0.5, y = 12) + 
+                              "   d =",amis_w_inla_mod$mod$params$d),x = 0.5, y = 10) + 
   scale_linetype_manual(values = c("solid","solid","solid","solid","solid")) + 
   labs(color="",linetype="",x="",y="") + 
   scale_color_manual(values = col_temp) + 
@@ -77,11 +77,11 @@ p1 <- ggplot() +
 p1
 
 load("./sims/pqr/pqr-m2-gaussian-amis-w-inla.Rdata")
-load("./sims/pqr/pqr-m2-gaussian-is-w-inla.Rdata")
+#load("./sims/pqr/pqr-m2-gaussian-is-w-inla.Rdata")
 pqr_text <- create_pqr_text(amis_w_inla_mod$pqr,2)
 p2 <- ggplot() + 
   geom_line(data= amis_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="AMIS with INLA")) + 
-  geom_line(data= is_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="IS with INLA")) + 
+  #geom_line(data= is_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="IS with INLA")) + 
   geom_line(data = amis_w_inla_mod$pqr_truth,aes(x=x,y=y,linetype = quants,color="Truth")) + 
   geom_point(data = as.data.frame(amis_w_inla_mod$mod$data),aes(x=x,y=y),alpha=0.2) + 
   geom_text(data = pqr_text, aes(x=x,y=y,label=text)) + 
@@ -95,26 +95,27 @@ p2 <- ggplot() +
 p2
 
 load("./sims/pqr/pqr-m1-gamma-amis-w-inla.Rdata")
-load("./sims/pqr/pqr-m1-gamma-is-w-inla.Rdata")
+#load("./sims/pqr/pqr-m1-gamma-is-w-inla.Rdata")
 pqr_text <- create_pqr_text(amis_w_inla_mod$pqr,2)
 p3 <- ggplot() + 
   geom_line(data= amis_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="AMIS with INLA")) + 
-  geom_line(data= is_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="IS with INLA")) + 
+  #geom_line(data= is_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="IS with INLA")) + 
   geom_line(data = amis_w_inla_mod$pqr_truth,aes(x=x,y=y,linetype = quants,color="Truth")) + 
   geom_point(data = as.data.frame(amis_w_inla_mod$mod$data),aes(x=x,y=y),alpha=0.2) + 
   geom_text(data = pqr_text, aes(x=x,y=y,label=text)) + 
   annotate("text",label=paste("M1 Gamma \n","a =", amis_w_inla_mod$mod$params$a,"   b =", amis_w_inla_mod$mod$params$b,"   c =",amis_w_inla_mod$mod$params$c,
-                              "   d =",amis_w_inla_mod$mod$params$d),x = 0.5, y = 80) + 
+                              "   d =",amis_w_inla_mod$mod$params$d),x = 0.5, y = 70) + 
   scale_linetype_manual(values = c("solid","solid","solid","solid","solid")) + 
   labs(color="",linetype="",x="",y="") + 
   scale_color_manual(values = col_temp) + 
   guides(linetype = F) + 
-  theme_bw()
+  theme_bw() + 
+  coord_cartesian(ylim = c(0,80))
 p3
 
 
 load("./sims/pqr/pqr-m2-gamma-amis-w-inla.Rdata")
-load("./sims/pqr/pqr-m2-gamma-is-w-inla.Rdata")
+#load("./sims/pqr/pqr-m2-gamma-is-w-inla.Rdata")
 pqr_text <- create_pqr_text(amis_w_inla_mod$pqr,1)
 p4 <- ggplot() + 
   geom_line(data= amis_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="AMIS with INLA")) + 
@@ -136,9 +137,13 @@ library(ggpubr)
 ggarrange(p1,p2,p3,p4,ncol=2, nrow=2, common.legend = T,legend="bottom")
 
 # Lidar
-load("./sims/pqr/pqr-gaussian-lidar-is-w-inla.Rdata")
+#load("./sims/pqr/pqr-gaussian-lidar-is-w-inla.Rdata")
 load("./sims/pqr/pqr-gaussian-lidar-amis-w-inla.Rdata")
-
+amis_w_inla_mod$theta$a.mu[,2]=amis_w_inla_mod$theta$a.mu[,2]/amis_w_inla_mod$scale[1]
+params = amis_w_inla_mod$theta$a.mu[nrow(amis_w_inla_mod$theta$a.mu),]
+amis_w_inla_mod$eta[,2] = amis_w_inla_mod$eta[,2]/amis_w_inla_mod$scale[1]
+amis_w_inla_mod$eta_kern[[2]]$x = amis_w_inla_mod$eta_kern[[2]]$x/amis_w_inla_mod$scale[1]
+amis_w_inla_mod$mod$range = amis_w_inla_mod$mod$range*amis_w_inla_mod$scale[1]
 
 p1 <- ggplot() + 
   geom_line(data = as.data.frame(amis_w_inla_mod$margs$intercept), aes(x=x,y=y)) + 
@@ -174,11 +179,6 @@ p5 <- ggplot() +
   theme_bw() +
   labs(x="c",y="d")
 p5
-# amis_w_inla_mod$theta$a.mu[,2]=amis_w_inla_mod$theta$a.mu[,2]/amis_w_inla_mod$scale[1]
-# params = amis_w_inla_mod$theta$a.mu[nrow(amis_w_inla_mod$theta$a.mu),]
-# amis_w_inla_mod$eta[,2] = amis_w_inla_mod$eta[,2]/amis_w_inla_mod$scale[1]
-# amis_w_inla_mod$eta_kern[[2]]$x = amis_w_inla_mod$eta_kern[[2]]$x/amis_w_inla_mod$scale[1]
-# amis_w_inla_mod$mod$range = amis_w_inla_mod$mod$range*amis_w_inla_mod$scale[1]
 
 formula = logratio ~ f(range, model = "rw2", constr = T, scale.model =  F)
 res = inla(formula,
@@ -237,7 +237,7 @@ p6 <- ggplot()+
   geom_line(data = amis_w_inla_mod$pqr, aes(x=x,y=y,linetype = quants)) + 
   geom_line(data = amis_w_inla_mod$pqr_more, aes(x=x,y=y,color = quants)) + 
   #geom_line(data = is_w_inla_mod$pqr, aes(x=x,y=y,color = quants, linetype = "IS with INLA")) + 
-  geom_point(data = amis_w_inla_mod$mod, aes(x = range, y = logratio),alpha = 0.5)+
+  geom_point(data = amis_w_inla_mod$mod, aes(x = range, y = logratio),alpha = 0.4)+
   labs(x="range",y="logratio",color = "", linetype = "") + 
   scale_color_manual(values = rep("grey",18)) + 
   scale_linetype_manual(values = rep("solid",5)) + 
@@ -248,47 +248,49 @@ p6
 
 amis_w_inla_mod$ess = running.ESS(amis_w_inla_mod$eta, amis_w_inla_mod$times,ws =  amis_w_inla_mod$weight, norm = F)
 essp <- ggplot() + 
-  geom_line(data = amis_w_inla_mod$ess,aes(x=time,y=ess,color = "AMIS with INLA")) +
-  scale_x_continuous(labels = c("0 sec", "1 min", "5 min", "20 min", "1 h"),trans="log",breaks=c(0,60,60*5,60*20,60*60)) + 
+  geom_line(data = amis_w_inla_mod$ess,aes(x=time,y=ess)) +
+  scale_x_continuous(labels = c("0 min", "5 min", "10 min", "15 min"),breaks=c(0,60*5,60*10,60*15)) + 
   labs(color = "",x="Runtime",y="ESS") +
   theme_bw() + 
-  coord_cartesian(xlim = c(10,60*70)) + 
+  coord_cartesian(xlim = c(10,60*16)) + 
   scale_color_manual(values = col_temp) + 
   theme(legend.position="bottom")
 essp
 
+ggarrange(p1,p2,p3,p4,p5,essp,nrow = 3,ncol=2)
 
 # ImmunogG
 load("./sims/pqr/pqr-gamma-ImmunogG-amis-w-inla.Rdata")
 load("./sims/pqr/pqr-gamma-ImmunogG-is-w-inla.Rdata")
 amis_w_inla_mod$pqr = pqr_inla(amis_w_inla_mod$mod,amis_w_inla_mod$margs,amis_w_inla_mod$eta_kern,type = "gamma",domain = c(0,7)) 
-is_w_inla_mod$pqr = pqr_inla(is_w_inla_mod$mod,is_w_inla_mod$margs,is_w_inla_mod$eta_kern,type = "gamma",domain = c(0,7)) 
+amis_w_inla_mod$ess = running.ESS(amis_w_inla_mod$eta, amis_w_inla_mod$times,ws =  amis_w_inla_mod$weight, norm = F)
+#is_w_inla_mod$pqr = pqr_inla(is_w_inla_mod$mod,is_w_inla_mod$margs,is_w_inla_mod$eta_kern,type = "gamma",domain = c(0,7)) 
 
 p1 <- ggplot() + 
-  geom_line(data = as.data.frame(amis_w_inla_mod$margs$a), aes(x=x,y=y,color = "AMIS with INLA")) + 
-  geom_line(data = as.data.frame(is_w_inla_mod$margs$a), aes(x=x,y=y,color = "IS with INLA")) + 
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$a), aes(x=x,y=y)) + 
+  #geom_line(data = as.data.frame(is_w_inla_mod$margs$a), aes(x=x,y=y,color = "IS with INLA")) + 
   labs(color = "",x="a",y="") + 
   scale_color_manual(values = col_temp[c(1,3)]) + 
   theme_bw()
 p1
 p2 <- ggplot() + 
-  geom_line(data = as.data.frame(amis_w_inla_mod$margs$b), aes(x=x,y=y,color = "AMIS with INLA")) + 
-  geom_line(data = as.data.frame(is_w_inla_mod$margs$b), aes(x=x,y=y,color = "IS with INLA")) + 
+  geom_line(data = as.data.frame(amis_w_inla_mod$margs$b), aes(x=x,y=y)) + 
+  #geom_line(data = as.data.frame(is_w_inla_mod$margs$b), aes(x=x,y=y,color = "IS with INLA")) + 
   labs(color = "",x="b",y="") + 
   scale_color_manual(values = col_temp[c(1,3)]) + 
   theme_bw()
 p2
 p3 <- ggplot() + 
-  geom_line(data = amis_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="AMIS with INLA")) + 
-  geom_line(data = is_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="IS with INLA")) + 
+  geom_line(data = amis_w_inla_mod$eta_kern[[1]],aes(x=x,y=y)) + 
+  #geom_line(data = is_w_inla_mod$eta_kern[[1]],aes(x=x,y=y,color="IS with INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$mod$params$c) + 
   labs(color = "",x = "c",y="") +
   scale_color_manual(values = col_temp[c(1,3)]) + 
   theme_bw()
 p3
 p4 <- ggplot() + 
-  geom_line(data = amis_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="AMIS with INLA")) + 
-  geom_line(data = is_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="IS with INLA")) + 
+  geom_line(data = amis_w_inla_mod$eta_kern[[2]],aes(x=x,y=y)) + 
+  #geom_line(data = is_w_inla_mod$eta_kern[[2]],aes(x=x,y=y,color="IS with INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$mod$params$d) + 
   scale_color_manual(values = col_temp[c(1,3)]) + 
   labs(color = "",x = "d",y="") + 
@@ -303,8 +305,8 @@ for (x in unique(amis_w_inla_mod$pqr$quants)){
 }
 
 p5 <- ggplot() + 
-  geom_line(data= amis_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="AMIS with INLA")) + 
-  geom_line(data= is_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="IS with INLA")) + 
+  geom_line(data= amis_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants)) + 
+  #geom_line(data= is_w_inla_mod$pqr,aes(x=x,y=y,linetype=quants,color="IS with INLA")) + 
   geom_point(data = as.data.frame(amis_w_inla_mod$mod),aes(x=x,y=y),alpha=0.3) + 
   geom_text(data = pqr_text, aes(x=x,y=y,label= text)) + 
   scale_linetype_manual(values = c("solid","solid","solid","solid","solid")) + 
@@ -314,9 +316,10 @@ p5 <- ggplot() +
   theme_bw()
 p5
 
+
 essp <- ggplot() + 
-  geom_line(data = amis_w_inla_mod$ess,aes(x=time,y=ess,color = "AMIS with INLA")) +
-  geom_line(data = is_w_inla_mod$ess,aes(x=time,y=ess,color = "IS with INLA")) +
+  geom_line(data = amis_w_inla_mod$ess,aes(x=time,y=ess)) +
+  #geom_line(data = is_w_inla_mod$ess,aes(x=time,y=ess,color = "IS with INLA")) +
   scale_x_continuous(labels = c("0 min", "5 min", "10 min", "15 min"),breaks=c(0,60*5,60*10,60*15)) + 
   labs(color = "",x="Runtime",y="ESS") +
   theme_bw() + 
@@ -361,7 +364,7 @@ p1amis <- ggplot() +
   scale_color_manual(values = col_temp[1]) + 
   scale_fill_manual(values = col_temp[3]) + 
   scale_x_continuous(label = T_s, breaks = seq(7)) + 
-  labs(x = "T",y = expression(beta[1]),color="",fill="",title="AMIS with INLA") +
+  labs(x = "T",y = expression(beta[1]),color="",fill="") +
   theme_bw() + 
   theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))+
   coord_cartesian(ylim = c(0,15))
@@ -400,7 +403,7 @@ p2amis <-ggplot() +
   scale_color_manual(values = col_temp[1]) + 
   scale_fill_manual(values = col_temp[3]) + 
   scale_x_continuous(label = T_s, breaks = seq(7)) + 
-  labs(x = "T",y = expression(beta[2]),color="",fill="",title="AMIS with INLA") +
+  labs(x = "T",y = expression(beta[2]),color="",fill="") +
   theme_bw() + 
   theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01)) 
 p2amis
