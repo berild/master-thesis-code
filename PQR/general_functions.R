@@ -6,7 +6,7 @@ require(mvtnorm)
 require(MASS)
 
 prior.param <- function(x, log = TRUE) {
-  sum(dunif(x, -100, 100, log = log))
+  sum(dnorm(x, 0, 100, log = log))
 }
 
 
@@ -137,11 +137,13 @@ pqr_truth_lines <- function(data,params,type){
   return(res[-1,])
 }
 
-pqr_inla <- function(data,margs,eta_kern,type,domain = NA){
+pqr_inla <- function(data,margs,a.mu,type,domain = NA){
   tmpx = data$x
   quants = c(0.1,0.25,0.5,0.75,0.9)
-  params = c(sapply(margs, function(x){x$x[which.max(x$y)]}),
-             sapply(eta_kern, function(x){x$x[which.max(x$y)]}))
+  params = c(inla.zmarginal(margs$a,silent=T)[[1]],
+             inla.zmarginal(margs$b,silent=T)[[1]],
+             a.mu[1],
+             a.mu[2])
   if (!anyNA(domain)){
     tmpx = seq(domain[1],domain[2],length.out = 500)
   }

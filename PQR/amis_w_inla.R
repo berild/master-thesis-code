@@ -136,7 +136,7 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     res$eta_kern = amis_kde(res$eta,res$weight) 
   }
   if (!anyNA(pqr)){
-    res$pqr = pqr_inla(data,res$margs,res$eta_kern,type = pqr) 
+    res$pqr = pqr_inla(data,res$margs,res$theta$a.mu[nrow(res$theta$a.mu),],type = pqr) 
   }
   return(res)
 }
