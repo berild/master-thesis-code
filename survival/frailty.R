@@ -5,6 +5,7 @@ library(Brq)
 library(INLA)
 library(spatstat)
 library(survival)
+library(LaplacesDemon)
 source("./survival/frailty_general_functions.R")
 source("./survival/frailty_amis_w_inla.R")
 
@@ -38,14 +39,35 @@ res_inla =inla(formula,
 
 # init = list(mu = rep(1,n_class),cov = 1*diag(n_class))
 max.frail = max(res_inla$marginals.hyperpar$`Precision for idx`[res_inla$marginals.hyperpar$`Precision for idx`[,2]>1e-8,1])
-init = list(mu = res_inla$summary.random$idx[,2],
-            cov = diag(res_inla$summary.random$idx[,3]^2))
+init = list(mu = c(res_inla$summary.random$idx[,2],res_inla$summary.hyperpar[2,1]),
+            cov = diag(c(res_inla$summary.random$idx[,3],res_inla$summary.hyperpar[2,2])^2))
 
-amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.effect,
+## Frailty model
+prior.frailty <- function(x, log = TRUE) {
+  if (log){
+    sum(dgamma(exp(x[-length(x)]),shape = x[length(x)],rate = x[length(x)],log = T)) + dgamma(x[length(x)],shape = 1,rate = 0.01,log = log)
+  }else{
+    prod(dgamma(exp(x[-length(x)]),shape = x[length(x)],rate = x[length(x)],log = F))*dgamma(x[length(x)],shape = 1,rate = 0.01,log = F)
+  }
+}
+
+
+
+dq.frailty <- function(y, x, sigma = init$cov, log =TRUE) {
+  tmp = dst(y[length(y)],mu = x[length(x)],sigma=sqrt(diag(sigma)[length(x)]),nu=3)
+  sum(dgamma(y[-length(y)],shape = x[length(x)],rate = x[length(x)],log=log)) + tmp
+}
+
+rq.frailty <- function(x, sigma = init$cov) {
+  tmp  = abs(rst(1,mu = x[length(x)],sigma=sqrt(diag(sigma)[length(x)]),nu=3))
+  c(rgamma(length(x)-1,shape = tmp,rate = tmp),tmp)
+}
+
+amis_w_inla_mod = amis.w.inla(data = data, init = init, prior.frailty,
                               dq.frailty, rq.frailty, fit.inla,
-                              N_t = seq(25,50,1)*10, N_0 = 250,frailty=T)
+                              N_t = seq(30,50,1)*10, N_0 = 4200,frailty=T)
 amis_w_inla_mod$params = list(intercept = intercept, beta = beta, alpha = alpha, frailty = frailty.param, params = unique(u))
-save(amis_w_inla_mod,file = "./sims/test3-frailty-amis-w-inla.Rdata")
+save(amis_w_inla_mod,file = "./sims/test-last-frailty-amis-w-inla.Rdata")
 
 # data(kidney)
 # n_class = length(unique(kidney$id))

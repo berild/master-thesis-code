@@ -5,33 +5,23 @@ require(spdep)
 require(mvtnorm)
 require(MASS)
 
+
+# 
 # prior.effect <- function(x, log = TRUE) {
+#   frailty.seq = seq(0,max.frail,length.out = 51)[-1]
+#   prior.frailty.seq = prior.frailty(frailty.seq)
+#   cond.frailty.seq = numeric(length(frailty.seq))
+#   for (i in seq(length(frailty.seq))){
+#     cond.frailty.seq[i] = sum(dgamma(x,shape = frailty.seq[i],rate = frailty.seq[i],log=T)) + 
+#       prior.frailty.seq[i]
+#   }
+#   step = frailty.seq[2]-frailty.seq[1]
 #   if (log){
-#     sum(dgamma(exp(x),shape = 1,rate = 0.01,log = log)) 
+#     return(log(step*sum(exp(cond.frailty.seq))))
 #   }else{
-#     prod(dgamma(exp(x),shape = 1,rate = 0.01,log = log))
+#     return(step*sum(exp(cond.frailty.seq)))
 #   }
 # }
-
-prior.effect <- function(x, log = TRUE) {
-  frailty.seq = seq(0,max.frail,length.out = 51)[-1]
-  prior.frailty.seq = prior.frailty(frailty.seq)
-  cond.frailty.seq = numeric(length(frailty.seq))
-  for (i in seq(length(frailty.seq))){
-    cond.frailty.seq[i] = sum(dgamma(x,shape = frailty.seq[i],rate = frailty.seq[i],log=T)) + 
-      prior.frailty.seq[i]
-  }
-  step = frailty.seq[2]-frailty.seq[1]
-  if (log){
-    return(log(step*sum(exp(cond.frailty.seq))))
-  }else{
-    return(step*sum(exp(cond.frailty.seq)))
-  }
-}
-
-prior.frailty <- function(x, log = TRUE) {
-  dgamma(x,shape = 1,rate = 0.01,log = log)
-}
 
 fit.inla.kidney <- function(data,eta){
   data$oset = log(eta[data$id])
@@ -49,6 +39,7 @@ fit.inla.kidney <- function(data,eta){
 
 fit.inla <- function(data,eta){
   # data$oset = log(eta[data$idx])
+  eta = eta[-length(eta)]
   data$oset = log(eta[data$idx])
   formula = inla.surv(y,event) ~ x + offset(oset)
   res=inla(formula,

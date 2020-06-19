@@ -4,31 +4,6 @@ require(INLABMA)
 require(parallel)
 require(mvtnorm)
 
-dq.frailty <- function(y, x, sigma = init$cov, log =TRUE) {
-  rate = x/diag(sigma)
-  shape = x^2/diag(sigma)
-  if (log){
-    sum(dgamma(y, rate = rate, shape = shape, log = log))
-  }else{
-    prod(dgamma(y, rate = rate, shape = shape, log = log))
-  }
-  #dmvt(y, sigma = sigma, df=3, delta = x, type = "shifted",log=log)
-  #dmvnorm(y, mean = x, sigma = sigma, log = log)
-  # if (log){
-  #   sum(dnorm(y,mean = x, sd = sqrt(diag(sigma))))
-  # }else{
-  #   prod(dnorm(y,mean = x, sd = sqrt(diag(sigma))))
-  # }
-}
-
-rq.frailty <- function(x, sigma = init$cov) {
-  rate = x/diag(sigma)
-  shape = x^2/diag(sigma)
-  rgamma(n = length(x),rate=rate,shape = shape)
-  #as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
-  #as.vector(rmvnorm(1, mean = x, sigma = sigma))
-  #rnorm(length(x),mean=x,sd = sqrt(diag(sigma)))
-}
 
 calc.delta <- function(N_t,eta,theta,t,d.prop){
   tmp = 0
@@ -57,12 +32,12 @@ update.delta.weight <- function(delta,weight,N_t,eta,theta,t,mlik,prior,d.prop){
 
 par.amis <- function(x,data, theta, t, N_0, N_t, N_tmp,
                      prior, d.prop, r.prop, fit.inla){
-  INLA_crash = T
+  INLA_crash = TRUE
   while(INLA_crash){
     tryCatch({
       eta = r.prop(theta$a.mu[t+1,], sigma = theta$a.cov[,,t+1])
       mod = fit.inla(data = data ,eta = eta)
-      INLA_crash = F 
+      INLA_crash = FALSE
     },error=function(e){
     },finally={})
   }
@@ -156,7 +131,6 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     res$eta_kern = amis_kde(log(res$eta),res$weight) 
   }
   if ((!anyNA(frailty))){
-    res$frailty = calc.param(res$mlik,res$eta,res$weight)
     res$frailty_idx = kde.quantile(res$eta_kern)
   }
   if (!anyNA(pqr)){
