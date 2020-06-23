@@ -5,13 +5,11 @@ require(parallel)
 require(mvtnorm)
 
 dq.param <- function(y, x, sigma = init$cov, log =TRUE) {
-  dmvt(y,sigma = sigma, df=3, delta = x, type = "shifted",log=log)
-  #dmvnorm(y, mean = x, sigma = sigma, log = log)
+  dmvnorm(y, mean = x, sigma = sigma, log = log)
 }
 
-rq.param <- function(x, sigma = init$cov) {
-  as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
-  #as.vector(rmvnorm(1, mean = x, sigma = sigma))
+rq.param  <- function(x, sigma = init$cov) {
+  as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
 
 par.is <- function(x, data, theta, t, prior, d.prop, r.prop, fit.inla){
@@ -29,14 +27,12 @@ par.is <- function(x, data, theta, t, prior, d.prop, r.prop, fit.inla){
 }
 
 
-is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = 200, N = 400, pqr = NA, kde = NA){
+is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = NA, N = 400, pqr = NA, kde = NA){
   if (detectCores()>10){
     ncores = 10
   }else{
     ncores = detectCores()
   }
-  eta = matrix(NA, ncol = length(init$mu), nrow = N_0)
-  weight = numeric(N_0)
   theta = list(a.mu = matrix(NA, ncol = length(init$mu), nrow = 2),
                a.cov = array(NA, dim = c(length(init$mu), length(init$mu), 2)))
   theta$a.mu[1,] = init$mu
@@ -44,16 +40,25 @@ is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = 200, N 
   starttime = Sys.time()
   times = numeric(N)
   res = list()
-  pb <- txtProgressBar(min = 0, max = N+N_0, style = 3)
-  is.list = mclapply(seq(N_0), function(x){
-    par.is(x, data, theta, 1, prior, d.prop,r.prop, fit.inla)
-  }, mc.set.seed = TRUE, mc.cores = ncores)
-  for (i in seq(length(is.list))){
-    setTxtProgressBar(pb, i)
-    eta[i,]= is.list[[i]]$eta
-    weight[i] = is.list[[i]]$weight
+  if (anyNA(N_0)){
+    pb <- txtProgressBar(min = 0, max = N, style = 3)
+    theta$a.mu[2,] = init$mu
+    theta$a.cov[,,2] = init$cov
+    N_0 = 0
+  }else{
+    pb <- txtProgressBar(min = 0, max = N+N_0, style = 3)
+    weight = numeric(N_0)
+    eta = matrix(NA, ncol = length(init$mu), nrow = N_0)
+    is.list = mclapply(seq(N_0), function(x){
+      par.is(x, data, theta, 1, prior, d.prop,r.prop, fit.inla)
+    }, mc.set.seed = TRUE, mc.cores = ncores)
+    for (i in seq(length(is.list))){
+      setTxtProgressBar(pb, i)
+      eta[i,]= is.list[[i]]$eta
+      weight[i] = is.list[[i]]$weight
+    }
+    theta = calc.theta(theta,weight,eta,N_0,2)
   }
-  theta = calc.theta(theta,weight,eta,N_0,2)
   margs = NA
   eta = matrix(NA, ncol = length(init$mu), nrow = N)
   weight = numeric(N)

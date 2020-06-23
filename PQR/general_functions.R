@@ -161,6 +161,29 @@ pqr_inla <- function(data,margs,a.mu,type,domain = NA){
   return(res[-1,])
 }
 
+calc.post.mean <- function(eta,ws=NA){
+  if (anyNA(ws)){
+    colMeans(eta)
+  }else{
+    colSums(eta*ws)/sum(ws)
+  }
+}
+
+calc.post.sd <- function(eta,ws=NA){
+  res = numeric(ncol(eta))
+  if (anyNA(ws)){
+    for (i in seq(ncol(eta))){
+      res[i] = sd(eta[,i])
+    }
+  }else{
+    tmp = calc.post.mean(eta,ws)
+    for (i in seq(ncol(eta))){
+      res[i] = sqrt(sum(ws*(eta[,i] - tmp[i])^2/sum(ws)))
+    }
+  }
+  return(res)
+}
+
 running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
   if (anyNA(ws)){
     require(coda)
