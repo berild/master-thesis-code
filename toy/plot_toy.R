@@ -151,12 +151,8 @@ ggarrange(cont1,cont2,cont3,essp,ncol=2, nrow=2, common.legend = T,legend="botto
 
 
 p1mcmc <- ggplot() + 
-  geom_polygon(data = data.frame(x = inla_mod$marginals.fixed$x1[,1], 
-                                 y = 10500+inla_mod$marginals.fixed$x1[,2]/max(inla_mod$marginals.fixed$x1[,2])*2000), aes(x=y,y=x,fill = "target")) +
-  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$full_eta[1:500,1])), y = mcmc_w_inla_mod$full_eta[1:500,1]),aes(x=x,y=y),alpha=0.4) + 
+  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$full_eta[1:500,1])), y = mcmc_w_inla_mod$full_eta[1:500,1]),aes(x=x,y=y),color="darkgrey") + 
   geom_path(data = data.frame(x = seq(501,500+length(mcmc_w_inla_mod$eta[,1])), y = mcmc_w_inla_mod$eta[,1]),aes(x=x,y=y)) + 
-  geom_path(data = data.frame(x = mcmc_w_inla_mod$eta_uni_kerns[[1]]$x,
-                                 y = 10500+ mcmc_w_inla_mod$eta_uni_kerns[[1]]$y/max(mcmc_w_inla_mod$eta_uni_kerns[[1]]$y)*2000),aes(x=y,y=x,color = "estimate"))+
   scale_color_manual(values = col_temp[1]) + 
   scale_fill_manual(values = col_temp[3]) + 
   labs(x = "N",y = expression(beta[1]),color="",fill="") +
@@ -165,12 +161,8 @@ p1mcmc <- ggplot() +
 p1mcmc
 
 p2mcmc <- ggplot() + 
-  geom_polygon(data = data.frame(x = inla_mod$marginals.fixed$x2[,1], 
-                                 y = 10500+inla_mod$marginals.fixed$x2[,2]/max(inla_mod$marginals.fixed$x2[,2])*2000), aes(x=y,y=x,fill = "target")) +
-  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$full_eta[1:500,2])), y = mcmc_w_inla_mod$full_eta[1:500,2]),aes(x=x,y=y),alpha = 0.4) + 
-  geom_path(data = data.frame(x = seq(501,500 + length(mcmc_w_inla_mod$eta[,2])), y = mcmc_w_inla_mod$eta[,2]),aes(x=x,y=y)) + 
-  geom_path(data = data.frame(x = mcmc_w_inla_mod$eta_uni_kerns[[2]]$x,
-                              y = 10500+ mcmc_w_inla_mod$eta_uni_kerns[[2]]$y/max(mcmc_w_inla_mod$eta_uni_kerns[[2]]$y)*2000),aes(x=y,y=x,color = "estimate"))+
+  geom_path(data = data.frame(x = seq(length(mcmc_w_inla_mod$full_eta[1:500,2])), y = mcmc_w_inla_mod$full_eta[1:500,2]),aes(x=x,y=y),color = "darkgrey") + 
+  geom_path(data = data.frame(x = seq(501,500 + length(mcmc_w_inla_mod$eta[,2])), y = mcmc_w_inla_mod$eta[,2]),aes(x=x,y=y)) +
   scale_color_manual(values = col_temp[1]) + 
   scale_fill_manual(values = col_temp[3]) + 
   labs(color = "",fill = "") + 
@@ -213,8 +205,9 @@ p1amis <- ggplot() +
   geom_path(data = amis_adaptive[[7]],aes(x=y,y=x, color = "proposal")) + 
   scale_color_manual(values = col_temp[1]) + 
   scale_fill_manual(values = col_temp[3]) + 
+  coord_cartesian(ylim = c(-6,6))+
   scale_x_continuous(label = T_s, breaks = seq(7)) + 
-  labs(x = "T",y = expression(beta[1]),color="",fill="",title="AMIS with INLA") +
+  labs(x = "t",y = expression(beta[1]),color="",fill="",title="AMIS with INLA") +
   theme_bw() + 
   theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
 p1amis
@@ -250,8 +243,9 @@ p2amis <-ggplot() +
   geom_path(data = amis_adaptive21[[7]],aes(x=y,y=x, color = "proposal")) +
   scale_color_manual(values = col_temp[1]) + 
   scale_fill_manual(values = col_temp[3]) + 
+  coord_cartesian(ylim = c(-6,6))+
   scale_x_continuous(label = T_s, breaks = seq(7)) + 
-  labs(x = "T",y = expression(beta[2]),color="",fill="",title="AMIS with INLA") +
+  labs(x = "t",y = expression(beta[2]),color="",fill="",title="AMIS with INLA") +
   theme_bw() + 
   theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
 p2amis
@@ -277,7 +271,8 @@ p1is <-ggplot() +
   scale_color_manual(values = col_temp[1]) + 
   scale_fill_manual(values = col_temp[3]) + 
   scale_x_continuous(label = seq(2), breaks = seq(2)) + 
-  labs(color="",fill="",x="T",y = expression(beta[1]),title="IS with INLA") +
+  coord_cartesian(ylim = c(-6,6))+
+  labs(color="",fill="",x="t",y = expression(beta[1]),title="IS with INLA") +
   theme_bw()+
   theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
 p1is
@@ -304,7 +299,8 @@ p2is <-ggplot() +
   scale_color_manual(values = col_temp[1]) + 
   scale_fill_manual(values = col_temp[3]) + 
   scale_x_continuous(label = seq(2), breaks = seq(2)) + 
-  labs(color="",fill="",x="T",y = expression(beta[2]),title="IS with INLA") +
+  labs(color="",fill="",x="t",y = expression(beta[2]),title="IS with INLA") +
+  coord_cartesian(ylim = c(-6,6))+
   theme_bw()+ 
   theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
 p2is
