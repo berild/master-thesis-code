@@ -88,24 +88,24 @@ fit.inla <- function(data,eta){
 
 
 
-init = list(mu = c(0,0),cov = 0.5*diag(2))
-
-dq.rho.lambda <- function(y, x, sigma = init$cov, log =TRUE) {
-  dmvnorm(y, mean = x, sigma = sigma, log = log)
-}
-
-rq.rho.lambda <- function(x, sigma = init$cov) {
-  as.vector(rmvnorm(1, mean = x, sigma = sigma))
-}
-
-source("./sem/mcmc_w_inla.R")
-mcmc_w_inla_mod <- mcmc.w.inla(data = turnout, init = init,
-                               prior.rho.lambda, dq.rho.lambda, rq.rho.lambda, fit.inla,
-                               n.samples = 10500, n.burnin = 500, n.thin = 1)
-save(mcmc_w_inla_mod, file = "./sims/sem-mcmc-w-inla.Rdata")
-eta_kern_mcmc = kde2d.weighted(x = mcmc_w_inla_mod$eta[,1], y = mcmc_w_inla_mod$eta[,2], w = rep(1,nrow(mcmc_w_inla_mod$eta))/nrow(mcmc_w_inla_mod$eta), n = 100, lims = c(-1,1,-1,1))
-mcmc_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_mcmc$x, y=eta_kern_mcmc$y), z=as.vector(eta_kern_mcmc$z))
-save(mcmc_w_inla_mod, file = "./sims/sem-mcmc-w-inla.Rdata")
+# init = list(mu = c(0,0),cov = 0.5*diag(2))
+# 
+# dq.rho.lambda <- function(y, x, sigma = init$cov, log =TRUE) {
+#   dmvnorm(y, mean = x, sigma = sigma, log = log)
+# }
+# 
+# rq.rho.lambda <- function(x, sigma = init$cov) {
+#   as.vector(rmvnorm(1, mean = x, sigma = sigma))
+# }
+# 
+# source("./sem/mcmc_w_inla.R")
+# mcmc_w_inla_mod <- mcmc.w.inla(data = turnout, init = init,
+#                                prior.rho.lambda, dq.rho.lambda, rq.rho.lambda, fit.inla,
+#                                n.samples = 10500, n.burnin = 500, n.thin = 1)
+# save(mcmc_w_inla_mod, file = "./sims/sem-mcmc-w-inla.Rdata")
+# eta_kern_mcmc = kde2d.weighted(x = mcmc_w_inla_mod$eta[,1], y = mcmc_w_inla_mod$eta[,2], w = rep(1,nrow(mcmc_w_inla_mod$eta))/nrow(mcmc_w_inla_mod$eta), n = 100, lims = c(-1,1,-1,1))
+# mcmc_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_mcmc$x, y=eta_kern_mcmc$y), z=as.vector(eta_kern_mcmc$z))
+# save(mcmc_w_inla_mod, file = "./sims/sem-mcmc-w-inla.Rdata")
 
 
 # mcmc_mod <- spBreg_sac(TURNOUT01 ~ log(GDPCAP), data = as.data.frame(turnout),
@@ -126,4 +126,12 @@ save(mcmc_w_inla_mod, file = "./sims/sem-mcmc-w-inla.Rdata")
 # names(mcmc_mod$margs) = names(mcmc_mod$samples)
 # save(mcmc_mod,file = "./sims/sem/sem-mcmc.Rdata")
 
+
+# BMA with INLA 
+source("./sem/bma_w_inla.R")
+eta.grid = as.matrix(expand.grid(seq(-1,1,length.out=100),seq(-1,1,length.out=100)))
+bma_w_inla_mod <- bma.w.inla(data=turnout,eta.grid, prior.rho.lambda,fit.inla)
+eta_kern = kde2d.weighted(x = bma_w_inla_mod$eta[,1], y = bma_w_inla_mod$eta[,2], w = bma_w_inla_mod$weight, n = 100, lims = c(-1,1,-1,1))
+bma_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern$x, y=eta_kern$y), z=as.vector(eta_kern$z))
+save(mcmc_w_inla_mod, file = "./sims/sem-bma-w-inla.Rdata")
 
