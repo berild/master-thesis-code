@@ -1,4 +1,5 @@
 library(ggplot2)
+library(ggpubr)
 # simulated datasets
 load("./sims/test1-frailty-amis-w-inla.Rdata") # frailty = 1
 load("./sims/test2-frailty-amis-w-inla.Rdata") # frailty = 2
@@ -16,63 +17,70 @@ res_inla =inla(formula,
        control.family = list(list(variant = 0)))
 
 
-ggplot() + 
+p1 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$margs$intercept, aes(x=x,y=y,color = "AMIS w/ INLA")) + 
-  geom_line(data = as.data.frame(res_inla$marginals.fixed[[1]]),aes(x=x,y=y,color = "INLA")) + 
+  #geom_line(data = as.data.frame(res_inla$marginals.fixed[[1]]),aes(x=x,y=y,color = "INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$params$intercept,color = "firebrick")+ 
   labs(title = "Intercept") +
   labs(color = "",x="",y="")+
   coord_cartesian(xlim=c(-1,5)) + 
   theme_bw()
+p1
 
-
-ggplot() + 
+p2 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$margs$beta, aes(x=x,y=y,color = "AMIS w/ INLA")) +
-  geom_line(data = as.data.frame(res_inla$marginals.fixed[[2]]),aes(x=x,y=y,color = "INLA")) + 
+  #geom_line(data = as.data.frame(res_inla$marginals.fixed[[2]]),aes(x=x,y=y,color = "INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$params$beta,color = "firebrick")+
   labs(title= "Beta") + 
   labs(color = "",x="",y="")+
   coord_cartesian(xlim=c(1.5,3.3)) + 
   theme_bw()
+p2
 
-ggplot() + 
+p3 <- ggplot() + 
   geom_line(data = amis_w_inla_mod$margs$alpha, aes(x=x,y=y,color = "AMIS w/ INLA")) +
-  geom_line(data = as.data.frame(res_inla$marginals.hyperpar[[1]]),aes(x=x,y=y,color = "INLA")) + 
+  #geom_line(data = as.data.frame(res_inla$marginals.hyperpar[[1]]),aes(x=x,y=y,color = "INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$params$alpha,color = "firebrick")+
   labs(title= "Alpha") + 
   labs(color = "",x="",y="")+
-  coord_cartesian(xlim=c(0.75,1.5)) + 
   theme_bw()
+p3
 
-
-#amis_w_inla_mod$frailty = calc.param(amis_w_inla_mod$mlik,amis_w_inla_mod$eta,amis_w_inla_mod$weight)
 #amis_w_inla_mod$quants = kde.quantile(amis_w_inla_mod$eta_kern)
-inla_frailty_idx = as.data.frame(res_inla$summary.random$idx[,4:6])
-names(inla_frailty_idx) = names(amis_w_inla_mod$frailty_idx[,2:4])
-inla_frailty_idx = data.frame(inla_frailty_idx,idx = amis_w_inla_mod$frailty_idx$idx[-11])
+#inla_frailty_idx = as.data.frame(res_inla$summary.random$idx[,4:6])
+#names(inla_frailty_idx) = names(amis_w_inla_mod$frailty_idx[,2:4])
+#inla_frailty_idx = data.frame(inla_frailty_idx,idx = amis_w_inla_mod$frailty_idx$idx[-11])
 
-amis_w_inla_mod$frailty_idx = data.frame(amis_w_inla_mod$frailty_idx[-11,], rv = log(amis_w_inla_mod$params$params))
+amis_w_inla_mod$frailty_idx = data.frame(amis_w_inla_mod$frailty_idx, rv = log(amis_w_inla_mod$params$params))
 
-ggplot() + 
-  geom_ribbon(data = inla_frailty_idx,aes(x =idx,ymin = q0.025, ymax=q0.975),fill = gg_color_hue(3)[2],color = gg_color_hue(3)[2] ,alpha = 0.3,show.legend = FALSE)  + 
+
+p5 <- ggplot() + 
+  #geom_ribbon(data = inla_frailty_idx,aes(x =idx,ymin = q0.025, ymax=q0.975),fill = gg_color_hue(3)[2],color = gg_color_hue(3)[2] ,alpha = 0.3,show.legend = FALSE)  + 
   geom_ribbon(data = amis_w_inla_mod$frailty_idx,aes(x =idx, ymin=q0.025, ymax=q0.975),fill = gg_color_hue(3)[1],color = gg_color_hue(3)[1], alpha = 0.3,show.legend = FALSE) +
   geom_line(data = amis_w_inla_mod$frailty_idx,aes(x =idx,y=q0.5,color = "AMIS w/INLA")) +
-  geom_line(data = inla_frailty_idx, aes(x =idx,y=q0.5,color = "INLA")) +
-  geom_point(data= data.frame(x = seq(10),y = log(amis_w_inla_mod$theta$a.mu[23,-11])), aes(x=x,y=y,color = "test")) + 
+  #geom_line(data = inla_frailty_idx, aes(x =idx,y=q0.5,color = "INLA")) +
   geom_point(data = amis_w_inla_mod$frailty_idx,aes(x =idx,y=q0.5,color = "AMIS w/INLA"),size=2) +
-  geom_point(data = inla_frailty_idx, aes(x =idx,y=q0.5,color = "INLA")) +
+  #geom_point(data = inla_frailty_idx, aes(x =idx,y=q0.5,color = "INLA")) +
   geom_point(data = amis_w_inla_mod$frailty_idx,aes(x =idx,y = rv,color = "Real Value"),size=2) + 
   labs(y = "",color = "") +
+  scale_color_manual(values = c(gg_color_hue(2)[1],"firebrick")) + 
   scale_x_discrete(name ="idx", 
                    limits=amis_w_inla_mod$frailty_idx$idx)+
   theme_bw()
-
-ggplot() + 
-  geom_line(data = amis_w_inla_mod$eta_kern[[11]],aes(x=x,y=y,color = "AMIS w/ INLA")) + 
-  geom_line(data = as.data.frame(res_inla$marginals.hyperpar$`Precision for idx`[-c(74,75),]),aes(x=x,y=y,color = "INLA")) + 
+p5
+amis_w_inla_mod$frailty.prec.kde= as.data.frame(density(x = amis_w_inla_mod$frailty.prec,
+                                                        weights = amis_w_inla_mod$weight/sum(amis_w_inla_mod$weight),
+                                                        from = 0,
+                                                        to = 10,
+                                                        kernel = "gaussian")[c(1,2)])
+p6 <- ggplot() + 
+  geom_line(data = amis_w_inla_mod$frailty.prec.kde,aes(x=x,y=y,color = "AMIS w/ INLA")) + 
+  #geom_line(data = as.data.frame(res_inla$marginals.hyperpar$`Precision for idx`[-c(74,75),]),aes(x=x,y=y,color = "INLA")) + 
   geom_vline(xintercept = amis_w_inla_mod$params$frailty,color = "firebrick") + 
   labs(title= "Rate/Shape of frailty") + 
   labs(color = "")+
-  coord_cartesian(xlim=c(0,10)) + 
+  coord_cartesian(xlim = c(0,10)) +
   theme_bw()
+p6
 
+ggarrange(p1,p2,p3,p5,p6,nrow=3,ncol=2,common.legend = TRUE, legend = "bottom")

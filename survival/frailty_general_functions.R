@@ -52,18 +52,18 @@ fit.inla <- function(data,eta){
                            alpha = res$marginals.hyperpar[[1]])))
 }
 
-dq.param <- function(param, eta, mlik){
-  weight = numeric(length(param))
-  for (j in seq(length(param))){
-    for (i in seq(nrow(eta))){
-      weight[j] = weight[j] + 
-        exp(sum(dgamma(eta[i,],rate = param[j],shape = param[j],log=TRUE)) + 
-              mlik[i] + prior.frailty(param[j]))
-    }
-  }
-  weight = weight/(sum(weight)*(param[2]-param[1]))
-  return(weight)
-}
+# dq.param <- function(param, eta, mlik){
+#   weight = numeric(length(param))
+#   for (j in seq(length(param))){
+#     for (i in seq(nrow(eta))){
+#       weight[j] = weight[j] + 
+#         exp(sum(dgamma(eta[i,],rate = param[j],shape = param[j],log=TRUE)) + 
+#               mlik[i] + prior.frailty(param[j]))
+#     }
+#   }
+#   weight = weight/(sum(weight)*(param[2]-param[1]))
+#   return(weight)
+# }
 
 calc.param <- function(mlik,eta,weight){
   frailty.seq = seq(0,max.frail,length.out = 101)[-1]

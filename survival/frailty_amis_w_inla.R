@@ -96,7 +96,7 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     times[i_tot] = as.numeric(difftime(ele$times,starttime,units = "secs"))
     
   }
-  theta = calc.theta(theta,weight,eta,i_tot,2)
+  theta = calc.theta(theta,weight,log(eta),i_tot,2)
   # adaptive importance sampling
   for (t in seq(length(N_t))){
     N_tmp = N_tmp + N_t[t]
@@ -118,10 +118,12 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
     delta.weight = update.delta.weight(delta[1:(N_tmp - N_t[t])],weight[1:(N_tmp - N_t[t])],N_t = c(N_0,N_t),eta[1:(N_tmp - N_t[t]),],theta,t,mlik[1:(N_tmp - N_t[t])],prior,d.prop)
     delta[1:(N_tmp - N_t[t])] = delta.weight$delta
     weight[1:(N_tmp - N_t[t])] = delta.weight$weight
-    theta = calc.theta(theta,weight,eta,i_tot,t+2)
+    theta = calc.theta(theta,weight,log(eta),i_tot,t+2)
+    print(theta$a.mu[t+2,])
   }
   res$mlik = mlik
-  res$eta = eta
+  res$frailty.prec = eta[,ncol(eta)]
+  res$eta = eta[,-ncol(eta)]
   res$times = times
   res$theta = theta
   #res$frailty = calc.param()
