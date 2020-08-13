@@ -4,7 +4,7 @@ require(INLABMA)
 require(parallel)
 require(mvtnorm)
 
-
+# function available for parallellization
 par.is <- function(x, data, theta, t, prior, d.prop, r.prop, fit.inla){
   INLA_crash = T
   while(INLA_crash){
@@ -19,7 +19,7 @@ par.is <- function(x, data, theta, t, prior, d.prop, r.prop, fit.inla){
   return(list(mlik = mod$mlik, dists = mod$dists, eta = eta, weight = weight, times = Sys.time()))
 }
 
-
+# main IS with INLA algorithm 
 is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = 200, N = 400){
   if (detectCores()>10){
     ncores = 20

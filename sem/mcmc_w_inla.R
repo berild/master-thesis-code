@@ -4,7 +4,7 @@ require(INLABMA)
 require(parallel)
 require(mvtnorm)
 
-
+# main MCMC with INLA algorithm
 mcmc.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla,
                         n.samples = 100, n.burnin = 5, n.thin = 1){
   eta = matrix(data = NA,nrow = n.samples, ncol = length(init$mu))
