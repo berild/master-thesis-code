@@ -4,13 +4,8 @@ require(INLABMA)
 require(parallel)
 require(mvtnorm)
 
-dq.param.mcmc <- function(y, x, sigma = init$cov, log =TRUE) {
-  dmvnorm(y, mean = x, sigma = sigma, log = log)
-}
 
-rq.param.mcmc  <- function(x, sigma = init$cov) {
-  as.vector(rmvnorm(1, mean = x, sigma = sigma))
-}
+# main MCMC with INLA algorithm
 mcmc.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla,
                         n.samples = 100, n.burnin = 5, n.thin = 1){
   eta = matrix(data = NA,nrow = n.samples, ncol = length(init$mu))

@@ -12,6 +12,7 @@ rq.param  <- function(x, sigma = init$cov) {
   as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
 
+# function available for parallellization
 par.is <- function(x, data, theta, t, prior, d.prop, r.prop, fit.inla){
   INLA_crash = T
   while(INLA_crash){
@@ -26,7 +27,7 @@ par.is <- function(x, data, theta, t, prior, d.prop, r.prop, fit.inla){
   return(list(mlik = mod$mlik, dists = mod$dists, eta = eta, weight = weight, times = Sys.time()))
 }
 
-
+# main IS with INLA algorithm 
 is.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = NA, N = 400, pqr = NA, kde = NA){
   if (detectCores()>10){
     ncores = 10

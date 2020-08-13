@@ -5,50 +5,8 @@ require(spdep)
 require(mvtnorm)
 require(MASS)
 
-prior.param <- function(x, log = TRUE) {
-  sum(dnorm(x, 0, 100, log = log))
-}
 
-
-fit.inla.ggamma <- function(data,eta){
-  res = inla(y ~ 1 + x, 
-             data = data,
-             scale = exp(eta[1] + eta[2]*data$x), 
-             family = "gamma",
-             control.family=list(hyper=list(theta=list(initial=log(1),fixed=TRUE))),
-             verbose = FALSE)
-  return(list(mlik = res$mlik[[1]],
-              dists = list(a = res$marginals.fixed[[1]],
-                           b = res$marginals.fixed[[2]])))
-}
-
-
-fit.inla.gaussian <- function(data,eta){
-  res = inla(y ~ 1 + x,
-             data = data, 
-             family = "gaussian",
-             scale = exp(eta[1] + eta[2]*data$x),
-             control.family = list(hyper = list(prec = list(initial = log(1), fixed = TRUE))),
-             verbose = FALSE)
-  return(list(mlik = res$mlik[[1]],
-              dists = list(a = res$marginals.fixed[[1]],
-                           b = res$marginals.fixed[[2]])))
-}
-
-fit.inla.rw2 <- function(data,eta){
-  formula = logratio ~ f(range, model = "rw2", constr = T, scale.model =  F)
-  res = inla(formula, 
-             data = data,
-             control.predictor = list(compute = T),
-             scale = exp(eta[1] + eta[2]*data$range), 
-             family = "gaussian",
-             control.family=list(hyper=list(theta=list(initial=log(1),fixed=TRUE))),
-             verbose = FALSE)
-  return(list(mlik = res$mlik[[1]],
-              dists = list(intercept = res$marginals.fixed[[1]],
-                           prec.range = res$marginals.hyperpar[[1]])))
-}
-
+# calculating parameters of proposal distribution AMIS and IS
 calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   weight[1:i_tot] = exp(weight[1:i_tot] - max(weight[1:i_tot]))
   for (i in seq(ncol(eta))){
@@ -63,7 +21,7 @@ calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   return(theta)
 }
 
-
+# calculating mean and variance of posterior marginals AMIS and IS
 calc.stats <- function(stats,weight){
   for (i in seq(length(stats))){
     new.stat = c(0,0)
@@ -74,6 +32,7 @@ calc.stats <- function(stats,weight){
   return(stats)
 }
 
+# adding stat to a list
 store.stats <- function(stat,stats,j,n.prop){
   if (anyNA(stats)){
     stats = stat
@@ -90,6 +49,7 @@ store.stats <- function(stat,stats,j,n.prop){
   }
 }
 
+# adding conditional posterior marginal densities to a list
 store.post <- function(marg,margs,j,n.prop){
   if (anyNA(margs)){
     margs = marg
@@ -121,6 +81,7 @@ amis_kde <- function(eta,weight){
   }))
 }
 
+# calculating the quantile curves using the true parameter values
 pqr_truth_lines <- function(data,params,type){
   quants = c(0.1,0.25,0.5,0.75,0.9)
   mu = params[[1]] + params[[2]]*data$x
@@ -137,6 +98,7 @@ pqr_truth_lines <- function(data,params,type){
   return(res[-1,])
 }
 
+# calculating the quantile curves using the approximated parameters
 pqr_inla <- function(data,margs,a.mu,type,domain = NA){
   tmpx = data$x
   quants = c(0.1,0.25,0.5,0.75,0.9)
@@ -161,6 +123,7 @@ pqr_inla <- function(data,margs,a.mu,type,domain = NA){
   return(res[-1,])
 }
 
+# function calculating poster mean 
 calc.post.mean <- function(eta,ws=NA){
   if (anyNA(ws)){
     colMeans(eta)
@@ -169,6 +132,7 @@ calc.post.mean <- function(eta,ws=NA){
   }
 }
 
+# function calculating posterior standard deviation
 calc.post.sd <- function(eta,ws=NA){
   res = numeric(ncol(eta))
   if (anyNA(ws)){
@@ -184,6 +148,7 @@ calc.post.sd <- function(eta,ws=NA){
   return(res)
 }
 
+# calculating running effective sample size
 running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
   if (anyNA(ws)){
     require(coda)
@@ -207,6 +172,7 @@ running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
   return(ess.df)
 }
 
+# Bayesian model averaging of conditional posterior marginals
 fit.marginals <- function(ws,margs,len = 400){
   ws = ws/sum(ws)
   xmin <- quantile(apply(margs[[1]],1,function(X){min(X)}),0.25)
@@ -219,6 +185,7 @@ fit.marginals <- function(ws,margs,len = 400){
   data.frame(x = xx, y = marg)
 }
 
+# multivariate weighted kernel density estimation 
 kde2d.weighted <- function (x, y, w, h, n = 25, lims = c(range(x), range(y))) {
   nx <- length(x)
   if (length(y) != nx) 
