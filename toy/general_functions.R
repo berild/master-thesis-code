@@ -5,6 +5,7 @@ require(spdep)
 require(mvtnorm)
 require(MASS)
 
+# calculating parameters of proposal distribution AMIS and IS
 calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   weight[1:i_tot] = exp(weight[1:i_tot] - max(weight[1:i_tot]))
   for (i in seq(ncol(eta))){
@@ -19,6 +20,7 @@ calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   return(theta)
 }
 
+# calculating mean and variance of posterior marginals AMIS and IS
 calc.stats <- function(stats,weight){
   for (i in seq(length(stats))){
     new.stat = c(0,0)
@@ -29,6 +31,7 @@ calc.stats <- function(stats,weight){
   return(stats)
 }
 
+# adding stat to a list
 store.stats <- function(stat,stats,j,n.prop){
   if (anyNA(stats)){
     stats = stat
@@ -45,6 +48,7 @@ store.stats <- function(stat,stats,j,n.prop){
   }
 }
 
+# adding conditional posterior marginal densities to a list
 store.post <- function(marg,margs,j,n.prop){
   if (anyNA(margs)){
     margs = marg
@@ -64,6 +68,7 @@ store.post <- function(marg,margs,j,n.prop){
   }
 }
 
+# calculating running effective sample size
 running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
   if (anyNA(ws)){
     require(coda)
@@ -87,6 +92,7 @@ running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
   return(ess.df)
 }
 
+# Bayesian model averaging of conditional posterior marginals
 fit.marginals <- function(ws,margs,len = 400){
   ws = ws/sum(ws)
   xmin <- quantile(apply(margs[[1]],1,function(X){min(X)}),0.25)
@@ -99,6 +105,7 @@ fit.marginals <- function(ws,margs,len = 400){
   data.frame(x = xx, y = marg)
 }
 
+# multivariate weighted kernel density estimation 
 kde2d.weighted <- function (x, y, w, h, n = 25, lims = c(range(x), range(y))) {
   nx <- length(x)
   if (length(y) != nx) 

@@ -4,6 +4,7 @@ library(MASS)
 library(coda)
 library(INLA)
 
+# function to sample data
 sample.linreg <- function(){
   n = 100
   x1 = runif(n)
@@ -17,10 +18,11 @@ sample.linreg <- function(){
 set.seed(1)
 df = sample.linreg()
 
+# fit the exact inla model
 inla_mod = inla(y~x, data=df) 
 save(inla_mod, file = "./sims/toy-inla.Rdata")
 
-
+# inla function fitting conditional LGMs in the combined methods
 fit.inla <- function(data, beta){
   data$oset = data$x%*%t(beta)
   res = inla(y~1+offset(oset), data = data)
@@ -31,43 +33,50 @@ fit.inla <- function(data, beta){
                            tau  = as.numeric(res$summary.hyperpar[1]))))
 }
 
-
+# the prior for the beta parameters
 prior.beta <- function(x, sigma = sqrt(1/.001), log = TRUE) {
   sum(dnorm(x, mean = 0, sd= sigma, log = log))
 }
 
+# loading general functions
 source("./toy/general_functions.R")
 
+# initial parameters of the proposal distribution in AMIS and IS
 init = list(mu = c(0,0),cov = diag(5,2,2))
 
+# proposal distribution in AMIS and IS
 rq.beta <- function(x, sigma = diag(5,2,2)) {
   rmvnorm(1,mean=x,sigma = sigma)
 }
-
 dq.beta <- function(y, x, sigma = diag(5,2,2), log =TRUE) {
   dmvnorm(y,mean = x, sigma = sigma,log = log)
 }
 
+# loading amis algorithm
 source("./toy/amis_w_inla.R")
 amis_w_inla_mod <- amis.w.inla(data = df, init = init, prior.beta,
                                dq.beta, rq.beta, fit.inla,
                                N_t = seq(25,50)*10, N_0 = 250)
 save(amis_w_inla_mod, file = "./sims/toy-amis-w-inla.Rdata")
 
+# loading is algorithm
 source("./toy/is_w_inla.R")
 is_w_inla_mod <- is.w.inla(data = df, init = init, prior.beta,
                            dq.beta, rq.beta, fit.inla, N_0 = 800, N = 10000)
 save(is_w_inla_mod, file = "./sims/toy-is-w-inla.Rdata")
 
+# proposal distribution MCMC
 rq.beta <- function(x, sigma = .75) {
   rnorm(length(x), mean = x, sd = sigma)
 }
-
 dq.beta <- function(y, x, sigma = .75, log =TRUE) {
   sum(dnorm(x, mean = y, sd = sigma, log = log))
 }
 
+# initial state MCMC
 init = list(mu = c(0,0),cov = 0.5*diag(2))
+
+# loading MCMC functions
 source("./toy/mcmc_w_inla.R")
 mcmc_w_inla_mod <- mcmc.w.inla(data = df, init = init, prior.beta,
                                dq.beta, rq.beta, fit.inla, n.samples = 10500, n.burnin = 500, n.thin = 1)
