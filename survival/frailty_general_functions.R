@@ -6,71 +6,7 @@ require(mvtnorm)
 require(MASS)
 
 
-# 
-# prior.effect <- function(x, log = TRUE) {
-#   frailty.seq = seq(0,max.frail,length.out = 51)[-1]
-#   prior.frailty.seq = prior.frailty(frailty.seq)
-#   cond.frailty.seq = numeric(length(frailty.seq))
-#   for (i in seq(length(frailty.seq))){
-#     cond.frailty.seq[i] = sum(dgamma(x,shape = frailty.seq[i],rate = frailty.seq[i],log=T)) + 
-#       prior.frailty.seq[i]
-#   }
-#   step = frailty.seq[2]-frailty.seq[1]
-#   if (log){
-#     return(log(step*sum(exp(cond.frailty.seq))))
-#   }else{
-#     return(step*sum(exp(cond.frailty.seq)))
-#   }
-# }
-
-fit.inla.kidney <- function(data,eta){
-  data$oset = log(eta[data$id])
-  formula = inla.surv(time,status) ~ age + sex + disease + offset(oset)
-  res=inla(formula,
-           family ="weibullsurv",
-           data=data,
-           control.family = list(list(variant = variant)))
-  return(list(mlik = res$mlik[[1]],
-              dists = list(intercept = arginals.fixed[[1]],
-                           age = res$marginals.fixed[[2]],
-                           sex = res$marginals.fixed[[3]],
-                           disease = res$marginals.fixed[[4]])))
-}
-
-fit.inla <- function(data,eta){
-  # data$oset = log(eta[data$idx])
-  eta = eta[-length(eta)]
-  data$oset = log(eta[data$idx])
-  formula = inla.surv(y,event) ~ x + offset(oset)
-  res=inla(formula,
-           family ="weibullsurv",
-           data=data,
-           control.family = list(list(variant = variant)))
-  return(list(mlik = res$mlik[[1]],
-              dists = list(intercept = res$marginals.fixed[[1]],
-                           beta = res$marginals.fixed[[2]],
-                           alpha = res$marginals.hyperpar[[1]])))
-}
-
-# dq.param <- function(param, eta, mlik){
-#   weight = numeric(length(param))
-#   for (j in seq(length(param))){
-#     for (i in seq(nrow(eta))){
-#       weight[j] = weight[j] + 
-#         exp(sum(dgamma(eta[i,],rate = param[j],shape = param[j],log=TRUE)) + 
-#               mlik[i] + prior.frailty(param[j]))
-#     }
-#   }
-#   weight = weight/(sum(weight)*(param[2]-param[1]))
-#   return(weight)
-# }
-
-calc.param <- function(mlik,eta,weight){
-  frailty.seq = seq(0,max.frail,length.out = 101)[-1]
-  frailty.weight = dq.param(frailty.seq,eta,mlik)
-  return(data.frame(x=frailty.seq,y = frailty.weight))
-}
-
+# calculating parameters of proposal distribution AMIS and IS
 calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   weight[1:i_tot] = exp(weight[1:i_tot] - max(weight[1:i_tot]))
   for (i in seq(ncol(eta))){
@@ -85,7 +21,7 @@ calc.theta <- function(theta,weight,eta,i_tot,i_cur){
   return(theta)
 }
 
-
+# calculating mean and variance of posterior marginals AMIS and IS
 calc.stats <- function(stats,weight){
   for (i in seq(length(stats))){
     new.stat = c(0,0)
@@ -96,6 +32,7 @@ calc.stats <- function(stats,weight){
   return(stats)
 }
 
+# adding stat to a list
 store.stats <- function(stat,stats,j,n.prop){
   if (anyNA(stats)){
     stats = stat
@@ -112,6 +49,7 @@ store.stats <- function(stat,stats,j,n.prop){
   }
 }
 
+# adding conditional posterior marginal densities to a list
 store.post <- function(marg,margs,j,n.prop){
   if (anyNA(margs)){
     margs = marg
@@ -145,7 +83,7 @@ amis_kde <- function(eta,weight){
   }
 }
 
-
+# calculating running effective sample size
 running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
   if (anyNA(ws)){
     require(coda)
@@ -169,6 +107,7 @@ running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
   return(ess.df)
 }
 
+# finding quantiles of the posterior marginals of the frailties
 kde.quantile <- function(kde){
   n_kd = length(kde)
   quants = data.frame(idx = seq(n_kd),q0.025 = numeric(n_kd),q0.5 = numeric(n_kd),q0.975 = numeric(n_kd))
@@ -194,6 +133,7 @@ kde.quantile <- function(kde){
   return(quants)
 }
 
+# Bayesian model averaging of conditional posterior marginals
 fit.marginals <- function(ws,margs,len = 400){
   ws = ws/sum(ws)
   xmin <- quantile(apply(margs[[1]],1,function(X){min(X)}),0.25)
@@ -206,6 +146,7 @@ fit.marginals <- function(ws,margs,len = 400){
   data.frame(x = xx, y = marg)
 }
 
+# multivariate weighted kernel density estimation 
 kde2d.weighted <- function (x, y, w, h, n = 25, lims = c(range(x), range(y))) {
   nx <- length(x)
   if (length(y) != nx) 

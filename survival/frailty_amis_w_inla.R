@@ -4,7 +4,7 @@ require(INLABMA)
 require(parallel)
 require(mvtnorm)
 
-
+# calc help parameter in weight calculation
 calc.delta <- function(N_t,eta,theta,t,d.prop){
   tmp = 0
   for (l in seq(t)){
@@ -13,6 +13,7 @@ calc.delta <- function(N_t,eta,theta,t,d.prop){
   return(tmp)
 }
 
+# function updating help parameter and weights
 update.delta.weight <- function(delta,weight,N_t,eta,theta,t,mlik,prior,d.prop){
   i_tmp = 0
   N_tmp = sum(N_t[1:(t+1)])
@@ -29,7 +30,7 @@ update.delta.weight <- function(delta,weight,N_t,eta,theta,t,mlik,prior,d.prop){
   ))
 }
 
-
+# function being parallelized 
 par.amis <- function(x,data, theta, t, N_0, N_t, N_tmp,
                      prior, d.prop, r.prop, fit.inla){
   INLA_crash = TRUE
@@ -51,7 +52,7 @@ par.amis <- function(x,data, theta, t, N_0, N_t, N_tmp,
   return(list(mlik = mod$mlik, dists = mod$dists, eta = eta, delta = delta, weight = weight, times = Sys.time()))
 }
 
-
+# main AMIS w/ INLA algorithm
 amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(20,20), N_0 = NA, pqr = NA, kde = NA, frailty=NA){
   if (anyNA(N_0)){
     N_0 = round(sum(N_t)/2) 
@@ -126,7 +127,6 @@ amis.w.inla <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = rep(2
   res$eta = eta[,-ncol(eta)]
   res$times = times
   res$theta = theta
-  #res$frailty = calc.param()
   res$weight = exp(weight - max(weight))
   res$margs = lapply(margs, function(x){fit.marginals(res$weight,x)})
   if ((!anyNA(kde))|(!anyNA(pqr))|(!anyNA(frailty))){
