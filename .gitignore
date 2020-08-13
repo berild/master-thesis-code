@@ -44,3 +44,5 @@ literature
 figures
 data
 **/old/*
+old
+*.html
